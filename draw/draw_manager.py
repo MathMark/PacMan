@@ -10,7 +10,7 @@ import math
 from model.player import Player
 
 PI = math.pi
-
+SPRITE_FREQUENCY = 8
 
 class DrawManager:
 
@@ -18,16 +18,30 @@ class DrawManager:
         self.screen = screen
         self.width = width
         self.height = height
+        self.counter = 0
+
+    def __calculate_sprite(self, player: Player):
+        self.counter += 1
+        if self.counter % SPRITE_FREQUENCY == 0:
+            player.sprite_index += 1
+        if self.counter % ((len(player.sprites) - 1) * SPRITE_FREQUENCY) == 0:
+            player.sprite_index = 0
 
     def draw_player(self, player: Player, direction: Direction):
+        self.__calculate_sprite(player)
         if direction == Direction.LEFT:
-            self.screen.blit(pygame.transform.flip(player.sprites[0], True, False), player.position)
+            self.screen.blit(pygame.transform.flip(player.sprites[player.sprite_index], True, False), (player.position_x, player.position_y))
+            player.position_x -= 1
         if direction == Direction.RIGHT:
-            self.screen.blit(player.sprites[0], player.position)
+            self.screen.blit(player.sprites[player.sprite_index], (player.position_x, player.position_y))
+            player.position_x += 1
         if direction == Direction.DOWN:
-            self.screen.blit(pygame.transform.rotate(player.sprites[0], 270), player.position)
+            self.screen.blit(pygame.transform.rotate(player.sprites[player.sprite_index], 270), (player.position_x, player.position_y))
+            player.position_y += 1
         if direction == Direction.UP:
-            self.screen.blit(pygame.transform.rotate(player.sprites[0], 90), player.position)
+            self.screen.blit(pygame.transform.rotate(player.sprites[player.sprite_index], 90), (player.position_x, player.position_y))
+            player.position_y -= 1
+
 
     def draw_level(self, level_config: LevelConfig):
         board = level_config.board
