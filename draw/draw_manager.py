@@ -1,18 +1,33 @@
 import numpy as np
 import pygame
+from pygame import Surface
+
 from model.board_structure import BoardStructure
+from model.direction import Direction
 from model.level_config import LevelConfig
 import math
+
+from model.player import Player
 
 PI = math.pi
 
 
 class DrawManager:
 
-    def __init__(self, screen, width, height):
+    def __init__(self, screen: Surface, width, height):
         self.screen = screen
         self.width = width
         self.height = height
+
+    def draw_player(self, player: Player, direction: Direction):
+        if direction == Direction.LEFT:
+            self.screen.blit(pygame.transform.flip(player.sprites[0], True, False), player.position)
+        if direction == Direction.RIGHT:
+            self.screen.blit(player.sprites[0], player.position)
+        if direction == Direction.DOWN:
+            self.screen.blit(pygame.transform.rotate(player.sprites[0], 270), player.position)
+        if direction == Direction.UP:
+            self.screen.blit(pygame.transform.rotate(player.sprites[0], 90), player.position)
 
     def draw_level(self, level_config: LevelConfig):
         board = level_config.board
