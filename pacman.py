@@ -3,13 +3,14 @@ import pygame
 from draw.draw_manager import DrawManager
 from levels.level_1 import level_1
 from model.direction import Direction
-from model.player import Player
+from model.player import Player, PLAYER_SPRITE_SIZE
 
 
 def load_player():
     player_images = []
     for i in range(1, 5):
-        player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'), (45, 45)))
+        player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'),
+                                                    (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
     return Player(player_images, WIDTH // 2, HEIGHT // 2)
 
 
@@ -23,16 +24,23 @@ pygame.init()
 timer = pygame.time.Clock()
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 
-draw_manager = DrawManager(screen, WIDTH, HEIGHT)
+
 player = load_player()
 direction = Direction.LEFT
+
+draw_manager = DrawManager(screen, level_1, player)
+
+center_x = player.position_x + 23
+center_y = player.position_y + 24
 
 while run:
     timer.tick(fps)
     screen.fill('black')
 
+    pygame.draw.circle(screen, 'white', (center_y, center_y), 2)
+
     draw_manager.draw_level(level_1)
-    draw_manager.draw_player(player, direction)
+    draw_manager.draw_player(direction)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

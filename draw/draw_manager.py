@@ -10,86 +10,101 @@ import math
 from model.player import Player
 
 PI = math.pi
-SPRITE_FREQUENCY = 8
+SPRITE_FREQUENCY = 7
+FLICK_FREQUENCY = 20
+
 
 class DrawManager:
 
-    def __init__(self, screen: Surface, width, height):
+    def __init__(self, screen: Surface, level: LevelConfig, player: Player):
         self.screen = screen
-        self.width = width
-        self.height = height
-        self.counter = 0
-
-    def __calculate_sprite(self, player: Player):
-        self.counter += 1
-        if self.counter % SPRITE_FREQUENCY == 0:
-            player.sprite_index += 1
-        if self.counter % ((len(player.sprites) - 1) * SPRITE_FREQUENCY) == 0:
-            player.sprite_index = 0
-
-    def draw_player(self, player: Player, direction: Direction):
-        self.__calculate_sprite(player)
-        if direction == Direction.LEFT:
-            self.screen.blit(pygame.transform.flip(player.sprites[player.sprite_index], True, False), (player.position_x, player.position_y))
-            player.position_x -= 1
-        if direction == Direction.RIGHT:
-            self.screen.blit(player.sprites[player.sprite_index], (player.position_x, player.position_y))
-            player.position_x += 1
-        if direction == Direction.DOWN:
-            self.screen.blit(pygame.transform.rotate(player.sprites[player.sprite_index], 270), (player.position_x, player.position_y))
-            player.position_y += 1
-        if direction == Direction.UP:
-            self.screen.blit(pygame.transform.rotate(player.sprites[player.sprite_index], 90), (player.position_x, player.position_y))
-            player.position_y -= 1
-
-
-    def draw_level(self, level_config: LevelConfig):
-        board = level_config.board
-        board_size = np.shape(board)
+        self.board = level.board
+        board_size = np.shape(self.board)
         board_height = board_size[0]
         board_width = board_size[1]
+        self.height_ratio = ((screen.get_height() - 50) // board_height)
+        self.width_ratio = (screen.get_width() // board_width)
+        self.counter = 0
+        self.flicker_counter = 0
+        self.flick = True
+        self.player = player
 
-        height_ratio = ((self.height - 50) // board_height)
-        width_ratio = (self.width // board_width)
+    def __calculate_sprite_index(self):
+        self.counter += 1
+        if self.counter % SPRITE_FREQUENCY == 0:
+            self.player.sprite_index += 1
+        if self.counter % ((len(self.player.sprites) - 1) * SPRITE_FREQUENCY) == 0:
+            self.player.sprite_index = 0
 
-        for i in range(len(board)):
-            for j in range(len(board[i])):
-                if board[i][j] == BoardStructure.DOT.value:
-                    center = (j * width_ratio + (0.5 * width_ratio), i * height_ratio + (0.5 * height_ratio))
+    def __check_position(self, player: Player):
+
+        pass
+
+    def draw_player(self, direction: Direction):
+        self.__calculate_sprite_index()
+        if direction == Direction.LEFT:
+            self.screen.blit(pygame.transform.flip(self.player.sprites[self.player.sprite_index], True, False),
+                             (self.player.position_x, self.player.position_y))
+            self.player.position_x -= self.player.velocity
+        if direction == Direction.RIGHT:
+            self.screen.blit(self.player.sprites[self.player.sprite_index], (self.player.position_x, self.player.position_y))
+            self.player.position_x += self.player.velocity
+        if direction == Direction.DOWN:
+            self.screen.blit(pygame.transform.rotate(self.player.sprites[self.player.sprite_index], 270),
+                             (self.player.position_x, self.player.position_y))
+            self.player.position_y += self.player.velocity
+        if direction == Direction.UP:
+            self.screen.blit(pygame.transform.rotate(self.player.sprites[self.player.sprite_index], 90),
+                             (self.player.position_x, self.player.position_y))
+            self.player.position_y -= self.player.velocity
+
+    def __calculate_flick(self):
+        self.flicker_counter += 1
+        if self.flicker_counter % FLICK_FREQUENCY == 0:
+            self.flick = not self.flick
+        if self.flicker_counter == FLICK_FREQUENCY * 2:
+            self.flicker_counter = 0
+
+    def draw_level(self, level_config: LevelConfig):
+        self.__calculate_flick()
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+                if self.board[i][j] == BoardStructure.DOT.value:
+                    center = (j * self.width_ratio + (0.5 * self.width_ratio), i * self.height_ratio + (0.5 * self.height_ratio))
                     pygame.draw.circle(self.screen, level_config.gate_color, center, 4)
-                if board[i][j] == BoardStructure.BIG_DOT.value:
-                    center = (j * width_ratio + (0.5 * width_ratio), i * height_ratio + (0.5 * height_ratio))
+                if self.board[i][j] == BoardStructure.BIG_DOT.value and not self.flick:
+                    center = (j * self.width_ratio + (0.5 * self.width_ratio), i * self.height_ratio + (0.5 * self.height_ratio))
                     pygame.draw.circle(self.screen, level_config.gate_color, center, 10)
-                if board[i][j] == BoardStructure.VERTICAL_WALL.value:
+                if self.board[i][j] == BoardStructure.VERTICAL_WALL.value:
                     pygame.draw.line(self.screen, level_config.wall_color,
-                                     (j * width_ratio + (0.5 * width_ratio), i * height_ratio),
-                                     (j * width_ratio + (0.5 * width_ratio), i * height_ratio + height_ratio), 3)
-                if board[i][j] == BoardStructure.HORIZONTAL_WALL.value:
+                                     (j * self.width_ratio + (0.5 * self.width_ratio), i * self.height_ratio),
+                                     (j * self.width_ratio + (0.5 * self.width_ratio), i * self.height_ratio + self.height_ratio), 3)
+                if self.board[i][j] == BoardStructure.HORIZONTAL_WALL.value:
                     pygame.draw.line(self.screen, level_config.wall_color,
-                                     (j * width_ratio, i * height_ratio + (0.5 * height_ratio)),
-                                     (j * width_ratio + width_ratio, i * height_ratio + (0.5 * height_ratio)), 3)
-                if board[i][j] == BoardStructure.TOP_RIGHT_CORNER.value:
+                                     (j * self.width_ratio, i * self.height_ratio + (0.5 * self.height_ratio)),
+                                     (j * self.width_ratio + self.width_ratio, i * self.height_ratio + (0.5 * self.height_ratio)), 3)
+                if self.board[i][j] == BoardStructure.TOP_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, level_config.wall_color,
-                                    [(j * width_ratio - (width_ratio * 0.4)) - 2,
-                                     (i * height_ratio + (0.5 * height_ratio)), width_ratio, height_ratio],
+                                    [(j * self.width_ratio - (self.width_ratio * 0.4)) - 2,
+                                     (i * self.height_ratio + (0.5 * self.height_ratio)), self.width_ratio, self.height_ratio],
                                     0, PI / 2, 3)
-                if board[i][j] == BoardStructure.TOP_LEFT_CORNER.value:
+                if self.board[i][j] == BoardStructure.TOP_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, level_config.wall_color,
-                                    [(j * width_ratio + (width_ratio * 0.5)), (i * height_ratio + (0.5 * height_ratio)),
-                                     width_ratio, height_ratio], PI / 2, PI,
+                                    [(j * self.width_ratio + (self.width_ratio * 0.5)), (i * self.height_ratio + (0.5 * self.height_ratio)),
+                                     self.width_ratio, self.height_ratio], PI / 2, PI,
                                     3)
-                if board[i][j] == BoardStructure.BOTTOM_LEFT_CORNER.value:
+                if self.board[i][j] == BoardStructure.BOTTOM_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, level_config.wall_color,
-                                    [(j * width_ratio + (width_ratio * 0.5)), (i * height_ratio - (0.4 * height_ratio)),
-                                     width_ratio, height_ratio], PI,
+                                    [(j * self.width_ratio + (self.width_ratio * 0.5)), (i * self.height_ratio - (0.4 * self.height_ratio)),
+                                     self.width_ratio, self.height_ratio], PI,
                                     3 * PI / 2, 3)
-                if board[i][j] == BoardStructure.BOTTOM_RIGHT_CORNER.value:
+                if self.board[i][j] == BoardStructure.BOTTOM_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, level_config.wall_color,
-                                    [(j * width_ratio - (width_ratio * 0.4)) - 2,
-                                     (i * height_ratio - (0.4 * height_ratio)), width_ratio, height_ratio],
+                                    [(j * self.width_ratio - (self.width_ratio * 0.4)) - 2,
+                                     (i * self.height_ratio - (0.4 * self.height_ratio)), self.width_ratio, self.height_ratio],
                                     3 * PI / 2,
                                     2 * PI, 3)
-                if board[i][j] == BoardStructure.GATE.value:
+                if self.board[i][j] == BoardStructure.GATE.value:
                     pygame.draw.line(self.screen, level_config.gate_color,
-                                     (j * width_ratio, i * height_ratio + (0.5 * height_ratio)),
-                                     (j * width_ratio + width_ratio, i * height_ratio + (0.5 * height_ratio)), 3)
+                                     (j * self.width_ratio, i * self.height_ratio + (0.5 * self.height_ratio)),
+                                     (j * self.width_ratio + self.width_ratio, i * self.height_ratio + (0.5 * self.height_ratio)), 3)
