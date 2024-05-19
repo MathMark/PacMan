@@ -26,12 +26,9 @@ screen = pygame.display.set_mode([WIDTH, HEIGHT])
 
 
 player = load_player()
-direction = Direction.LEFT
+direction_command = Direction.LEFT
 
 draw_manager = DrawManager(screen, level_1, player)
-
-center_x = player.position_x + 23
-center_y = player.position_y + 24
 
 while run:
     timer.tick(fps)

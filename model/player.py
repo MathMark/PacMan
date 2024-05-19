@@ -4,7 +4,7 @@ PLAYER_SPRITE_SIZE = 45
 
 
 class Player:
-    def __init__(self, sprites: list, position_x: int, position_y: int, velocity=2):
+    def __init__(self, sprites: list, position_x: int, position_y: int, velocity=1):
         self.sprites = sprites
         self.position_x = position_x
         self.position_y = position_y
@@ -18,12 +18,16 @@ class Player:
 
     def move_right(self):
         self.position_x += self.velocity
+        self.center_x += self.velocity
 
     def move_left(self):
         self.position_x -= self.velocity
+        self.center_x -= self.velocity
 
     def move_up(self):
         self.position_y -= self.velocity
+        self.center_y -= self.velocity
 
     def move_down(self):
         self.position_y += self.velocity
+        self.center_y += self.velocity

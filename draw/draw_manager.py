@@ -22,12 +22,13 @@ class DrawManager:
         board_size = np.shape(self.board)
         self.board_height = board_size[0]
         self.board_width = board_size[1]
-        self.height_ratio = ((screen.get_height() - 50) // self.board_height)
-        self.width_ratio = (screen.get_width() // self.board_width)
+        self.segment_height = ((screen.get_height() - 50) // self.board_height)
+        self.segment_width = (screen.get_width() // self.board_width)
         self.counter = 0
         self.flicker_counter = 0
         self.flick = True
         self.player = player
+        self.fudge_factor = 15
 
     def __calculate_sprite_index(self):
         self.counter += 1
@@ -42,21 +43,51 @@ class DrawManager:
         if self.player.direction == Direction.LEFT:
             self.screen.blit(pygame.transform.flip(self.player.sprites[self.player.sprite_index], True, False),
                              (self.player.position_x, self.player.position_y))
-            self.player.move_left()
+            if not self.__is_collision_left():
+                self.player.move_left()
 
         if self.player.direction == Direction.RIGHT:
             self.screen.blit(self.player.sprites[self.player.sprite_index],
                              (self.player.position_x, self.player.position_y))
-            self.player.move_right()
+            if not self.__is_collision_right():
+                self.player.move_right()
 
         if self.player.direction == Direction.DOWN:
             self.screen.blit(pygame.transform.rotate(self.player.sprites[self.player.sprite_index], 270),
                              (self.player.position_x, self.player.position_y))
-            self.player.move_down()
+            if not self.__is_collision_down():
+                self.player.move_down()
         if self.player.direction == Direction.UP:
             self.screen.blit(pygame.transform.rotate(self.player.sprites[self.player.sprite_index], 90),
                              (self.player.position_x, self.player.position_y))
-            self.player.move_up()
+            if not self.__is_collision_up():
+                self.player.move_up()
+        #print(f'{self.player.center_x}, {self.player.center_y}')
+
+
+
+    def __is_collision_down(self):
+        # a bit below player center coordinate
+        coordinate_x = (self.player.center_y + self.fudge_factor) // self.segment_height
+        coordinate_y = self.player.center_x // self.segment_width
+        return self.board[coordinate_x][coordinate_y] >= 3
+
+    def __is_collision_up(self):
+        # a bit upper player center coordinate
+        coordinate_x = (self.player.center_y - self.fudge_factor) // self.segment_height
+        coordinate_y = self.player.center_x // self.segment_width
+        return self.board[coordinate_x][coordinate_y] >= 3
+
+    def __is_collision_left(self):
+        coordinate_x = self.player.center_y // self.segment_height
+        coordinate_y = (self.player.center_x - self.fudge_factor) // self.segment_width
+        return self.board[coordinate_x][coordinate_y] >= 3
+
+    def __is_collision_right(self):
+        coordinate_x = self.player.center_y // self.segment_height
+        coordinate_y = (self.player.center_x + self.fudge_factor) // self.segment_width
+        return self.board[coordinate_x][coordinate_y] >= 3
+
 
     def __calculate_flick(self):
         self.flicker_counter += 1
@@ -71,51 +102,51 @@ class DrawManager:
             for j in range(len(self.board[i])):
                 if self.board[i][j] == BoardStructure.DOT.value:
                     center = (
-                        j * self.width_ratio + (0.5 * self.width_ratio),
-                        i * self.height_ratio + (0.5 * self.height_ratio))
+                        j * self.segment_width + (0.5 * self.segment_width),
+                        i * self.segment_height + (0.5 * self.segment_height))
                     pygame.draw.circle(self.screen, level_config.gate_color, center, 4)
                 if self.board[i][j] == BoardStructure.BIG_DOT.value and not self.flick:
                     center = (
-                        j * self.width_ratio + (0.5 * self.width_ratio),
-                        i * self.height_ratio + (0.5 * self.height_ratio))
+                        j * self.segment_width + (0.5 * self.segment_width),
+                        i * self.segment_height + (0.5 * self.segment_height))
                     pygame.draw.circle(self.screen, level_config.gate_color, center, 10)
                 if self.board[i][j] == BoardStructure.VERTICAL_WALL.value:
                     pygame.draw.line(self.screen, level_config.wall_color,
-                                     (j * self.width_ratio + (0.5 * self.width_ratio), i * self.height_ratio),
-                                     (j * self.width_ratio + (0.5 * self.width_ratio),
-                                      i * self.height_ratio + self.height_ratio), 3)
+                                     (j * self.segment_width + (0.5 * self.segment_width), i * self.segment_height),
+                                     (j * self.segment_width + (0.5 * self.segment_width),
+                                      i * self.segment_height + self.segment_height), 3)
                 if self.board[i][j] == BoardStructure.HORIZONTAL_WALL.value:
                     pygame.draw.line(self.screen, level_config.wall_color,
-                                     (j * self.width_ratio, i * self.height_ratio + (0.5 * self.height_ratio)),
-                                     (j * self.width_ratio + self.width_ratio,
-                                      i * self.height_ratio + (0.5 * self.height_ratio)), 3)
+                                     (j * self.segment_width, i * self.segment_height + (0.5 * self.segment_height)),
+                                     (j * self.segment_width + self.segment_width,
+                                      i * self.segment_height + (0.5 * self.segment_height)), 3)
                 if self.board[i][j] == BoardStructure.TOP_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, level_config.wall_color,
-                                    [(j * self.width_ratio - (self.width_ratio * 0.4)) - 2,
-                                     (i * self.height_ratio + (0.5 * self.height_ratio)), self.width_ratio,
-                                     self.height_ratio],
+                                    [(j * self.segment_width - (self.segment_width * 0.4)) - 2,
+                                     (i * self.segment_height + (0.5 * self.segment_height)), self.segment_width,
+                                     self.segment_height],
                                     0, PI / 2, 3)
                 if self.board[i][j] == BoardStructure.TOP_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, level_config.wall_color,
-                                    [(j * self.width_ratio + (self.width_ratio * 0.5)),
-                                     (i * self.height_ratio + (0.5 * self.height_ratio)),
-                                     self.width_ratio, self.height_ratio], PI / 2, PI,
+                                    [(j * self.segment_width + (self.segment_width * 0.5)),
+                                     (i * self.segment_height + (0.5 * self.segment_height)),
+                                     self.segment_width, self.segment_height], PI / 2, PI,
                                     3)
                 if self.board[i][j] == BoardStructure.BOTTOM_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, level_config.wall_color,
-                                    [(j * self.width_ratio + (self.width_ratio * 0.5)),
-                                     (i * self.height_ratio - (0.4 * self.height_ratio)),
-                                     self.width_ratio, self.height_ratio], PI,
+                                    [(j * self.segment_width + (self.segment_width * 0.5)),
+                                     (i * self.segment_height - (0.4 * self.segment_height)),
+                                     self.segment_width, self.segment_height], PI,
                                     3 * PI / 2, 3)
                 if self.board[i][j] == BoardStructure.BOTTOM_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, level_config.wall_color,
-                                    [(j * self.width_ratio - (self.width_ratio * 0.4)) - 2,
-                                     (i * self.height_ratio - (0.4 * self.height_ratio)), self.width_ratio,
-                                     self.height_ratio],
+                                    [(j * self.segment_width - (self.segment_width * 0.4)) - 2,
+                                     (i * self.segment_height - (0.4 * self.segment_height)), self.segment_width,
+                                     self.segment_height],
                                     3 * PI / 2,
                                     2 * PI, 3)
                 if self.board[i][j] == BoardStructure.GATE.value:
                     pygame.draw.line(self.screen, level_config.gate_color,
-                                     (j * self.width_ratio, i * self.height_ratio + (0.5 * self.height_ratio)),
-                                     (j * self.width_ratio + self.width_ratio,
-                                      i * self.height_ratio + (0.5 * self.height_ratio)), 3)
+                                     (j * self.segment_width, i * self.segment_height + (0.5 * self.segment_height)),
+                                     (j * self.segment_width + self.segment_width,
+                                      i * self.segment_height + (0.5 * self.segment_height)), 3)
