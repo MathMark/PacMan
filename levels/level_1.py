@@ -1,6 +1,7 @@
 # 0 = empty black rectangle, 1 = dot, 2 = big dot, 3 = vertical line,
 # 4 = horizontal line, 5 = top right, 6 = top left, 7 = bot left, 8 = bot right
 # 9 = gate
+from global_variables import FPS
 from model.board_definition import BoardDefinition
 from model.level_config import LevelConfig
 
@@ -41,5 +42,7 @@ board = [
          ]
 
 board_definition = BoardDefinition(board)
+power_up_limit = 10 * FPS  # 10 seconds
 
-level_1 = LevelConfig(wall_color='blue', gate_color='white', board_definition=board_definition)
+level_1 = LevelConfig(wall_color='blue', gate_color='white',
+                      board_definition=board_definition, power_up_limit=power_up_limit)

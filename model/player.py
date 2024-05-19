@@ -4,7 +4,7 @@ PLAYER_SPRITE_SIZE = 45
 
 
 class Player:
-    def __init__(self, sprites: list, position_x: int, position_y: int, velocity=2):
+    def __init__(self, sprites: list, position_x: int, position_y: int, velocity=2, lives=3):
         self.sprites = sprites
         self.position_x = position_x
         self.position_y = position_y
@@ -12,9 +12,10 @@ class Player:
         self.velocity = velocity
         self.center_x = self.position_x + PLAYER_SPRITE_SIZE // 2
         self.center_y = self.position_y + PLAYER_SPRITE_SIZE // 2
-        # R, L, U, D
-        self.turns_allowed = [False, False, False, False]
         self.direction = Direction.LEFT
+        self.power_up = False
+        self.lives = lives
+
 
     def teleport(self, x, y):
         self.position_x = x
