@@ -1,7 +1,7 @@
 # 0 = empty black rectangle, 1 = dot, 2 = big dot, 3 = vertical line,
 # 4 = horizontal line, 5 = top right, 6 = top left, 7 = bot left, 8 = bot right
 # 9 = gate
-
+from model.board_definition import BoardDefinition
 from model.level_config import LevelConfig
 
 board = [
@@ -40,4 +40,6 @@ board = [
 [7, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8]
          ]
 
-level_1 = LevelConfig(wall_color='blue', gate_color='white', board=board)
+board_definition = BoardDefinition(board)
+
+level_1 = LevelConfig(wall_color='blue', gate_color='white', board_definition=board_definition)

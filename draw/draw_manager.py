@@ -18,10 +18,10 @@ class DrawManager:
 
     def __init__(self, screen: Surface, level: LevelConfig, player: Player):
         self.screen = screen
-        self.board = level.board
-        board_size = np.shape(self.board)
-        self.board_height = board_size[0]
-        self.board_width = board_size[1]
+        self.board_definition = level.board_definition
+        self.board = self.board_definition.board
+        self.board_width = self.board_definition.width
+        self.board_height = self.board_definition.height
         self.segment_height = ((screen.get_height() - 50) // self.board_height)
         self.segment_width = (screen.get_width() // self.board_width)
         self.counter = 0
@@ -39,8 +39,10 @@ class DrawManager:
             self.player.sprite_index = 0
 
     def draw_player(self):
+        self.__teleport_if_needed()
         self.__calculate_sprite_index()
         self.__check_turns_allowed()
+
         if self.player.direction == Direction.LEFT:
             self.screen.blit(pygame.transform.flip(self.player.sprites[self.player.sprite_index], True, False),
                              (self.player.position_x, self.player.position_y))
@@ -67,27 +69,39 @@ class DrawManager:
 
     def __check_turns_allowed(self):
         if self.direction_command == Direction.LEFT:
-            coordinate_x = (self.player.center_y // self.segment_height)
-            coordinate_y = ((self.player.center_x - self.fudge_factor) // self.segment_width)
+            i = (self.player.center_y // self.segment_height)
+            j = ((self.player.center_x - self.fudge_factor) // self.segment_width)
         elif self.direction_command == Direction.RIGHT:
-            coordinate_x = (self.player.center_y // self.segment_height)
-            coordinate_y = ((self.player.center_x + self.fudge_factor) // self.segment_width)
+            i = (self.player.center_y // self.segment_height)
+            j = ((self.player.center_x + self.fudge_factor) // self.segment_width)
         elif self.direction_command == Direction.UP:
-            coordinate_x = ((self.player.center_y - self.fudge_factor) // self.segment_height)
-            coordinate_y = (self.player.center_x // self.segment_width)
+            i = ((self.player.center_y - self.fudge_factor) // self.segment_height)
+            j = (self.player.center_x // self.segment_width)
         else:  # direction == DOWN
-            coordinate_x = ((self.player.center_y + self.fudge_factor) // self.segment_height)
-            coordinate_y = (self.player.center_x // self.segment_width)
-
-        if self.board[coordinate_x][coordinate_y] < 3:
-            self.player.direction = self.direction_command
-        else:
-            self.direction_command = self.player.direction
+            i = ((self.player.center_y + self.fudge_factor) // self.segment_height)
+            j = (self.player.center_x // self.segment_width)
+        if self.board_definition.check_coordinate_within(i, j):
+            if self.board[i][j] < 3:
+                self.player.direction = self.direction_command
+            else:
+                self.direction_command = self.player.direction
 
     def __eat(self):
-        x = (self.player.center_y // self.segment_height)
-        y = (self.player.center_x // self.segment_width)
-        self.board[x][y] = 0
+        i = (self.player.center_y // self.segment_height)
+        j = (self.player.center_x // self.segment_width)
+        self.board[i][j] = 0
+
+    def __teleport_if_needed(self):
+        i = (self.player.position_y // self.segment_height)
+        j = (self.player.position_x // self.segment_width)
+        if j >= self.board_width - 1:
+            self.player.teleport(self.segment_width, self.player.position_y)
+        if j < 1:
+            self.player.teleport((self.board_width - 1) * self.segment_width, self.player.position_y)
+        if i >= self.board_height - 1:
+            self.player.teleport(self.player.position_x, self.segment_height)
+        if i < 1:
+            self.player.teleport(self.player.position_x, (self.board_height - 1) * self.segment_height)
 
     def __is_collision_down(self):
         # a bit below player center coordinate
@@ -107,9 +121,12 @@ class DrawManager:
         return self.board[coordinate_x][coordinate_y] >= 3
 
     def __is_collision_right(self):
+
         coordinate_x = self.player.center_y // self.segment_height
         coordinate_y = (self.player.center_x + self.fudge_factor) // self.segment_width
-        return self.board[coordinate_x][coordinate_y] >= 3
+        if self.board_definition.check_coordinate_within(coordinate_x, coordinate_y):
+            return self.board[coordinate_x][coordinate_y] >= 3
+        return False
 
     def __calculate_flick(self):
         self.flicker_counter += 1

@@ -11,7 +11,7 @@ def load_player():
     for i in range(1, 5):
         player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'),
                                                     (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
-    return Player(player_images, WIDTH // 2, HEIGHT // 2)
+    return Player(player_images, (WIDTH // 2), (HEIGHT // 2))
 
 
 fps = 60

@@ -16,6 +16,12 @@ class Player:
         self.turns_allowed = [False, False, False, False]
         self.direction = Direction.LEFT
 
+    def teleport(self, x, y):
+        self.position_x = x
+        self.position_y = y
+        self.center_x = self.position_x + PLAYER_SPRITE_SIZE // 2
+        self.center_y = self.position_y + PLAYER_SPRITE_SIZE // 2
+
     def move_right(self):
         self.position_x += self.velocity
         self.center_x += self.velocity
