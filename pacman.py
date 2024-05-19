@@ -37,24 +37,21 @@ while run:
     timer.tick(fps)
     screen.fill('black')
 
-    pygame.draw.circle(screen, 'white', (center_y, center_y), 2)
-
     draw_manager.draw_level(level_1)
-    draw_manager.draw_player(direction)
+    draw_manager.draw_player()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                direction = Direction.LEFT
+                player.direction = Direction.LEFT
             if event.key == pygame.K_RIGHT:
-                direction = Direction.RIGHT
+                player.direction = Direction.RIGHT
             if event.key == pygame.K_DOWN:
-                direction = Direction.DOWN
+                player.direction = Direction.DOWN
             if event.key == pygame.K_UP:
-                direction = Direction.UP
-
+                player.direction = Direction.UP
     pygame.display.flip()
 
 pygame.quit()

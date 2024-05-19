@@ -1,3 +1,5 @@
+from model.direction import Direction
+
 PLAYER_SPRITE_SIZE = 45
 
 
@@ -8,7 +10,20 @@ class Player:
         self.position_y = position_y
         self.sprite_index = 0
         self.velocity = velocity
-        self.center_x = PLAYER_SPRITE_SIZE // 2
-        self.center_y = PLAYER_SPRITE_SIZE // 2
+        self.center_x = self.position_x + PLAYER_SPRITE_SIZE // 2
+        self.center_y = self.position_y + PLAYER_SPRITE_SIZE // 2
         # R, L, U, D
-        self.turns_allowed = [False, False, False, False]
+        self.turns = [False, False, False, False]
+        self.direction = Direction.LEFT
+
+    def move_right(self):
+        self.position_x += self.velocity
+
+    def move_left(self):
+        self.position_x -= self.velocity
+
+    def move_up(self):
+        self.position_y -= self.velocity
+
+    def move_down(self):
+        self.position_y += self.velocity
