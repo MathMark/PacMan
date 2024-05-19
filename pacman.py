@@ -26,11 +26,11 @@ screen = pygame.display.set_mode([WIDTH, HEIGHT])
 
 
 player = load_player()
-direction_command = Direction.LEFT
 
 draw_manager = DrawManager(screen, level_1, player)
 
 while run:
+
     timer.tick(fps)
     screen.fill('black')
 
@@ -42,13 +42,13 @@ while run:
             run = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                player.direction = Direction.LEFT
+                draw_manager.direction_command = Direction.LEFT
             if event.key == pygame.K_RIGHT:
-                player.direction = Direction.RIGHT
+                draw_manager.direction_command = Direction.RIGHT
             if event.key == pygame.K_DOWN:
-                player.direction = Direction.DOWN
+                draw_manager.direction_command = Direction.DOWN
             if event.key == pygame.K_UP:
-                player.direction = Direction.UP
+                draw_manager.direction_command = Direction.UP
     pygame.display.flip()
 
 pygame.quit()

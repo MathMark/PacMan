@@ -29,6 +29,7 @@ class DrawManager:
         self.flick = True
         self.player = player
         self.fudge_factor = 15
+        self.direction_command = Direction.LEFT
 
     def __calculate_sprite_index(self):
         self.counter += 1
@@ -39,7 +40,7 @@ class DrawManager:
 
     def draw_player(self):
         self.__calculate_sprite_index()
-
+        self.__check_turns_allowed()
         if self.player.direction == Direction.LEFT:
             self.screen.blit(pygame.transform.flip(self.player.sprites[self.player.sprite_index], True, False),
                              (self.player.position_x, self.player.position_y))
@@ -62,9 +63,31 @@ class DrawManager:
                              (self.player.position_x, self.player.position_y))
             if not self.__is_collision_up():
                 self.player.move_up()
-        #print(f'{self.player.center_x}, {self.player.center_y}')
+        self.__eat()
 
+    def __check_turns_allowed(self):
+        if self.direction_command == Direction.LEFT:
+            coordinate_x = (self.player.center_y // self.segment_height)
+            coordinate_y = ((self.player.center_x - self.fudge_factor) // self.segment_width)
+        elif self.direction_command == Direction.RIGHT:
+            coordinate_x = (self.player.center_y // self.segment_height)
+            coordinate_y = ((self.player.center_x + self.fudge_factor) // self.segment_width)
+        elif self.direction_command == Direction.UP:
+            coordinate_x = ((self.player.center_y - self.fudge_factor) // self.segment_height)
+            coordinate_y = (self.player.center_x // self.segment_width)
+        else:  # direction == DOWN
+            coordinate_x = ((self.player.center_y + self.fudge_factor) // self.segment_height)
+            coordinate_y = (self.player.center_x // self.segment_width)
 
+        if self.board[coordinate_x][coordinate_y] < 3:
+            self.player.direction = self.direction_command
+        else:
+            self.direction_command = self.player.direction
+
+    def __eat(self):
+        x = (self.player.center_y // self.segment_height)
+        y = (self.player.center_x // self.segment_width)
+        self.board[x][y] = 0
 
     def __is_collision_down(self):
         # a bit below player center coordinate
@@ -87,7 +110,6 @@ class DrawManager:
         coordinate_x = self.player.center_y // self.segment_height
         coordinate_y = (self.player.center_x + self.fudge_factor) // self.segment_width
         return self.board[coordinate_x][coordinate_y] >= 3
-
 
     def __calculate_flick(self):
         self.flicker_counter += 1
