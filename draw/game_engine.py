@@ -3,6 +3,7 @@ from pygame import Surface
 
 from model.board_structure import BoardStructure
 from model.direction import Direction
+from model.ghost import Ghost
 from model.level_config import LevelConfig
 import math
 
@@ -11,31 +12,32 @@ from model.player import Player
 PI = math.pi
 SPRITE_FREQUENCY = 7
 FLICK_FREQUENCY = 20
-
+SCORE_SCREEN_OFFSET = 50
 
 class GameEngine:
 
-    def __init__(self, screen: Surface, level: LevelConfig, player: Player):
-        self.score_screen_offset = 50
+    def __init__(self, screen: Surface, level: LevelConfig, player: Player, ghosts: list[Ghost]):
         self.screen = screen
         self.level = level
         self.board_definition = level.board_definition
         self.board = self.board_definition.board
         self.board_width = self.board_definition.width
         self.board_height = self.board_definition.height
-        self.segment_height = ((screen.get_height() - self.score_screen_offset) // self.board_height)
+        self.segment_height = ((screen.get_height() - SCORE_SCREEN_OFFSET) // self.board_height)
         self.segment_width = (screen.get_width() // self.board_width)
         self.counter = 0
         self.flicker_counter = 0
         self.flick = True
         self.player = player
+        self.ghosts = ghosts
         self.fudge_factor = 15
         self.direction_command = Direction.LEFT
         pygame.font.init()
         self.game_font = pygame.font.SysFont('Comic Sans MS', 30)
         self.power_up_counter = 0
-        self.score_coordinates = (self.score_screen_offset, (self.screen.get_height() - self.score_screen_offset))
-        self.powerup_circle_coordinates = (250, ((self.screen.get_height() - self.score_screen_offset) + 15))
+        self.score_coordinates = (SCORE_SCREEN_OFFSET, (self.screen.get_height() - SCORE_SCREEN_OFFSET))
+        self.powerup_circle_coordinates = (250, ((self.screen.get_height() - SCORE_SCREEN_OFFSET) + 15))
+
 
     def __calculate_sprite_index(self):
         self.counter += 1
@@ -51,28 +53,29 @@ class GameEngine:
         self.__check_turns_allowed()
 
         if self.player.direction == Direction.LEFT:
-            self.screen.blit(pygame.transform.flip(self.player.sprites[self.player.sprite_index], True, False),
-                             (self.player.position_x, self.player.position_y))
+            self.player.draw_face_left(self.screen)
             if not self.__is_collision_left():
                 self.player.move_left()
 
         if self.player.direction == Direction.RIGHT:
-            self.screen.blit(self.player.sprites[self.player.sprite_index],
-                             (self.player.position_x, self.player.position_y))
+            self.player.draw_face_right(self.screen)
             if not self.__is_collision_right():
                 self.player.move_right()
 
         if self.player.direction == Direction.DOWN:
-            self.screen.blit(pygame.transform.rotate(self.player.sprites[self.player.sprite_index], 270),
-                             (self.player.position_x, self.player.position_y))
+            self.player.draw_face_down(self.screen)
             if not self.__is_collision_down():
                 self.player.move_down()
         if self.player.direction == Direction.UP:
-            self.screen.blit(pygame.transform.rotate(self.player.sprites[self.player.sprite_index], 90),
-                             (self.player.position_x, self.player.position_y))
+            self.player.draw_face_up(self.screen)
             if not self.__is_collision_up():
                 self.player.move_up()
         self.__eat()
+
+    def draw_ghosts(self):
+        for ghost in self.ghosts:
+            ghost.draw(self.screen)
+
 
     def __check_turns_allowed(self):
         if self.direction_command == Direction.LEFT:
@@ -98,6 +101,7 @@ class GameEngine:
             if self.power_up_counter <= 0:
                 self.player.power_up = False
                 self.power_up_counter = 0
+                self.__set_ghosts_normal()
         self.power_up_counter -= 1
 
     def __eat(self):
@@ -111,6 +115,19 @@ class GameEngine:
             self.level.score += 50
             self.player.power_up = True
             self.power_up_counter = self.level.power_up_limit
+            self.__set_ghosts_dead()
+
+    def __set_ghosts_dead(self):
+        for ghost in self.ghosts:
+            ghost.set_to_dead()
+
+    def __set_ghosts_spooked(self):
+        for ghost in self.ghosts:
+            ghost.set_to_spooked()
+
+    def __set_ghosts_normal(self):
+        for ghost in self.ghosts:
+            ghost.set_to_normal()
 
     def __teleport_if_board_limit_reached(self):
         i = (self.player.position_y // self.segment_height)
@@ -162,7 +179,8 @@ class GameEngine:
             pygame.draw.circle(self.screen, 'blue', self.powerup_circle_coordinates, 15)
         for i in range(self.player.lives):
             self.screen.blit(pygame.transform.scale(self.player.sprites[0], (30, 30)),
-                             (((self.screen.get_width() // 2) + (self.screen.get_width() // 4)) + i * 40, self.screen.get_height() - self.score_screen_offset))
+                             (((self.screen.get_width() // 2) + (self.screen.get_width() // 4)) + i * 40,
+                              self.screen.get_height() - SCORE_SCREEN_OFFSET))
 
     def draw_level(self, level_config: LevelConfig):
         self.__calculate_flick()

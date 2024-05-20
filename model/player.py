@@ -1,13 +1,17 @@
+from typing import Tuple
+
+import pygame
+
 from model.direction import Direction
 
 PLAYER_SPRITE_SIZE = 45
 
 
 class Player:
-    def __init__(self, sprites: list, position_x: int, position_y: int, velocity=2, lives=3):
+    def __init__(self, sprites: list, position: Tuple, velocity=2, lives=3):
         self.sprites = sprites
-        self.position_x = position_x
-        self.position_y = position_y
+        self.position_x = position[0]
+        self.position_y = position[1]
         self.sprite_index = 0
         self.velocity = velocity
         self.center_x = self.position_x + PLAYER_SPRITE_SIZE // 2
@@ -16,6 +20,21 @@ class Player:
         self.power_up = False
         self.lives = lives
 
+    def draw_face_left(self, screen):
+        screen.blit(pygame.transform.flip(self.sprites[self.sprite_index], True, False),
+                    (self.position_x, self.position_y))
+
+    def draw_face_right(self, screen):
+        screen.blit(self.sprites[self.sprite_index],
+                    (self.position_x, self.position_y))
+
+    def draw_face_down(self, screen):
+        screen.blit(pygame.transform.rotate(self.sprites[self.sprite_index], 270),
+                    (self.position_x, self.position_y))
+
+    def draw_face_up(self, screen):
+        screen.blit(pygame.transform.rotate(self.sprites[self.sprite_index], 90),
+                    (self.position_x, self.position_y))
 
     def teleport(self, x, y):
         self.position_x = x
