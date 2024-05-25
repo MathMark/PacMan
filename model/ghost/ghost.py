@@ -13,8 +13,10 @@ GHOST_SPRITE_SIZE = (45, 45)
 class Ghost:
     def __init__(self, init_position: Tuple, img, dead_img, spooked_img,
                  direction, target: Player, turns: Turns, space_params: SpaceParams, velocity=2):
-        self.x_pos = init_position[0]
-        self.y_pos = init_position[1]
+        self.center_x = init_position[0]
+        self.center_y = init_position[1]
+        self.x_pos = self.center_x - GHOST_SPRITE_SIZE[1] // 2
+        self.y_pos = self.center_y - GHOST_SPRITE_SIZE[1] // 2
         self.velocity = velocity
         self.img = img
         self.dead_img = dead_img
@@ -22,8 +24,6 @@ class Ghost:
         self.direction = direction
         self.target = target
         self.condition = self.Condition.CHASE
-        self.center_x = self.x_pos + GHOST_SPRITE_SIZE[0] // 2
-        self.center_y = self.y_pos + GHOST_SPRITE_SIZE[1] // 2
         self.turns = turns
         self.space_params = space_params
         self.board = space_params.board_definition.board
@@ -71,7 +71,7 @@ class Ghost:
         i = (self.center_y // self.space_params.segment_height)
         j = ((self.center_x - self.space_params.fudge_factor) // self.space_params.segment_width)
         if self.space_params.board_definition.check_coordinate_within(i, j) and \
-                self.board[i][j] < 3 or self.board[i][j] == 9:
+                self.board[i][j] < 3:
             self.turns.left = True
         else:
             self.turns.left = False
@@ -79,7 +79,7 @@ class Ghost:
         i = (self.center_y // self.space_params.segment_height)
         j = ((self.center_x + self.space_params.fudge_factor) // self.space_params.segment_width)
         if self.space_params.board_definition.check_coordinate_within(i, j) and \
-                self.board[i][j] < 3 or self.board[i][j] == 9:
+                self.board[i][j] < 3:
             self.turns.right = True
         else:
             self.turns.right = False
@@ -95,7 +95,7 @@ class Ghost:
         i = ((self.center_y + self.space_params.fudge_factor) // self.space_params.segment_height)
         j = (self.center_x // self.space_params.segment_width)
         if self.space_params.board_definition.check_coordinate_within(i, j) and\
-                self.board[i][j] < 3 or self.board[i][j] == 9:
+                self.board[i][j] < 3:
             self.turns.down = True
         else:
             self.turns.down = False
