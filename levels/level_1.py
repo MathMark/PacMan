@@ -47,7 +47,7 @@ board_definition = BoardDefinition(board)
 power_up_limit = 10 * FPS  # 10 seconds
 
 positions = InitialPositions(player_position=(15, 18),
-                             blinky_position=(12, 15),
+                             blinky_position=(12, 12),
                              pinky_position=(13, 15),
                              inky_position=(14, 15),
                              clyde_position=(15, 15))

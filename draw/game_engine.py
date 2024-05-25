@@ -3,7 +3,7 @@ from pygame import Surface
 
 from model.board_structure import BoardStructure
 from model.direction import Direction
-from model.ghost import Ghost
+from model.ghost.ghost import Ghost
 from model.level_config import LevelConfig
 import math
 
@@ -30,7 +30,7 @@ class GameEngine:
         self.flick = True
         self.player = player
         self.ghosts = ghosts
-        self.fudge_factor = 15
+        self.fudge_factor = 21
         self.direction_command = Direction.LEFT
         pygame.font.init()
         self.game_font = pygame.font.SysFont('Comic Sans MS', 30)
@@ -75,6 +75,7 @@ class GameEngine:
     def draw_ghosts(self):
         for ghost in self.ghosts:
             ghost.draw(self.screen)
+            ghost.move()
 
 
     def __check_turns_allowed(self):
@@ -127,7 +128,7 @@ class GameEngine:
 
     def __set_ghosts_normal(self):
         for ghost in self.ghosts:
-            ghost.set_to_normal()
+            ghost.set_to_chase()
 
     def __teleport_if_board_limit_reached(self):
         i = (self.player.position_y // self.segment_height)
