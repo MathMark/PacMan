@@ -3,6 +3,7 @@ from pygame import Surface
 
 from model.board_structure import BoardStructure
 from model.direction import Direction
+from model.eaten_object import EatenObject
 from model.ghost.ghost import Ghost
 from model.level_config import LevelConfig
 import math
@@ -10,7 +11,7 @@ import math
 from model.player import Player
 
 PI = math.pi
-SPRITE_FREQUENCY = 7
+
 FLICK_FREQUENCY = 20
 SCORE_SCREEN_OFFSET = 50
 
@@ -26,7 +27,6 @@ class GameEngine:
         self.board_height = self.board_definition.height
         self.segment_height = ((screen.get_height() - SCORE_SCREEN_OFFSET) // self.board_height)
         self.segment_width = (screen.get_width() // self.board_width)
-        self.counter = 0
         self.flicker_counter = 0
         self.flick = True
         self.player = player
@@ -48,8 +48,6 @@ class GameEngine:
         self.draw_misc()
         self.__o()
 
-
-
     def __o(self):
         for ghost in self.ghosts:
             if (abs(ghost.center_x - self.player.coordinates.x) < self.distance_factor) \
@@ -59,110 +57,23 @@ class GameEngine:
                 elif ghost.is_chasing():
                     self.player.lives = self.player.lives - 1
 
-    def __calculate_sprite_index(self):
-        self.counter += 1
-        if self.counter % SPRITE_FREQUENCY == 0:
-            self.player.sprite_index += 1
-        if self.counter % ((len(self.player.sprites) - 1) * SPRITE_FREQUENCY) == 0:
-            self.player.sprite_index = 0
-
     def draw_player(self):
-        self.__check_borders_ahead()
-        self.__check_turns_allowed()
-        self.__calculate_sprite_index()
         self.__calc_power_up_counter()
-        self.__teleport_if_board_limit_reached()
-
-        if self.player.direction == Direction.LEFT:
-            self.player.draw_face_left(self.screen)
-            if self.player.turns.left:
-                self.player.move_left()
-            else:
-                self.player.snap_to_center(self.segment_width, self.segment_height)
-
-        if self.player.direction == Direction.RIGHT:
-            self.player.draw_face_right(self.screen)
-            if self.player.turns.right:
-                self.player.move_right()
-            else:
-                self.player.snap_to_center(self.segment_width, self.segment_height)
-
-        if self.player.direction == Direction.DOWN:
-            self.player.draw_face_down(self.screen)
-            if self.player.turns.down:
-                self.player.move_down()
-            else:
-                self.player.snap_to_center(self.segment_width, self.segment_height)
-        if self.player.direction == Direction.UP:
-            self.player.draw_face_up(self.screen)
-            if self.player.turns.up:
-                self.player.move_up()
-            else:
-                self.player.snap_to_center(self.segment_width, self.segment_height)
-
-        self.__eat()
+        turned = self.player.move(self.screen, self.direction_command)
+        if not turned:
+            self.direction_command = self.player.direction
+        eaten = self.player.eat()
+        if eaten == EatenObject.DOT:
+            self.level.score += 10
+        elif eaten == EatenObject.BIG_DOT:
+            self.level.score += 50
+            self.power_up_counter = self.level.power_up_limit
+            self.__set_ghosts_frightened()
 
     def draw_ghosts(self):
         for ghost in self.ghosts:
             ghost.draw(self.screen)
             ghost.move()
-
-    def __check_turns_allowed(self):
-        if self.direction_command == Direction.LEFT and self.player.turns.left:
-            if self.player.direction == Direction.RIGHT:
-                self.player.direction = self.direction_command
-            else:
-                if self.player.is_at_center(self.segment_width, self.segment_height):
-                    self.player.direction = self.direction_command
-        elif self.direction_command == Direction.RIGHT and self.player.turns.right:
-            if self.player.direction == Direction.LEFT:
-                self.player.direction = self.direction_command
-            else:
-                if self.player.is_at_center(self.segment_width, self.segment_height):
-                    self.player.direction = self.direction_command
-
-        elif self.direction_command == Direction.UP and self.player.turns.up:
-            if self.player.direction == Direction.DOWN:
-                self.player.direction = self.direction_command
-            else:
-                if self.player.is_at_center(self.segment_width, self.segment_height):
-                    self.player.direction = self.direction_command
-        elif self.direction_command == Direction.DOWN and self.player.turns.down:
-            if self.player.direction == Direction.UP:
-                self.player.direction = self.direction_command
-            else:
-                if self.player.is_at_center(self.segment_width, self.segment_height):
-                    self.player.direction = self.direction_command
-        else:
-            self.direction_command = self.player.direction
-
-    def __check_borders_ahead(self):
-        i = (self.player.coordinates.y // self.segment_height)
-        j = ((self.player.coordinates.x + self.distance_factor) // self.segment_width) - 1
-        if self.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
-            self.player.turns.left = True
-        else:
-            self.player.turns.left = False
-
-        i = (self.player.coordinates.y // self.segment_height)
-        j = ((self.player.coordinates.x - self.distance_factor) // self.segment_width) + 1
-        if self.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
-            self.player.turns.right = True
-        else:
-            self.player.turns.right = False
-        i = ((self.player.coordinates.y + self.distance_factor) // self.segment_height) - 1
-        j = (self.player.coordinates.x // self.segment_width)
-        if self.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
-            self.player.turns.up = True
-        else:
-            self.player.turns.up = False
-
-        i = ((self.player.coordinates.y - self.distance_factor) // self.segment_height) + 1
-        j = (self.player.coordinates.x // self.segment_width)
-        if self.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
-            self.player.turns.down = True
-        else:
-            self.player.turns.down = False
 
     def __calc_power_up_counter(self):
         if self.player.power_up:
@@ -171,19 +82,6 @@ class GameEngine:
                 self.power_up_counter = 0
                 self.__set_ghosts_to_chase()
         self.power_up_counter -= 1
-
-    def __eat(self):
-        i = (self.player.coordinates.y // self.segment_height)
-        j = (self.player.coordinates.x // self.segment_width)
-        if self.board[i][j] == BoardStructure.DOT.value:
-            self.board[i][j] = 0
-            self.level.score += 10
-        elif self.board[i][j] == BoardStructure.BIG_DOT.value:
-            self.board[i][j] = 0
-            self.level.score += 50
-            self.player.power_up = True
-            self.power_up_counter = self.level.power_up_limit
-            self.__set_ghosts_frightened()
 
     def __set_ghosts_frightened(self):
         for ghost in self.ghosts:
@@ -196,18 +94,6 @@ class GameEngine:
     def __set_ghosts_to_chase(self):
         for ghost in self.ghosts:
             ghost.set_to_chase(self.player.coordinates)
-
-    def __teleport_if_board_limit_reached(self):
-        i = (self.player.position_y // self.segment_height)
-        j = (self.player.position_x // self.segment_width)
-        if j >= self.board_width - 1:
-            self.player.teleport(self.segment_width, self.player.position_y)
-        if j < 1:
-            self.player.teleport((self.board_width - 1) * self.segment_width, self.player.position_y)
-        if i >= self.board_height - 1:
-            self.player.teleport(self.player.position_x, self.segment_height)
-        if i < 1:
-            self.player.teleport(self.player.position_x, (self.board_height - 1) * self.segment_height)
 
     def __calculate_flick(self):
         self.flicker_counter += 1
