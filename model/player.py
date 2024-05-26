@@ -4,12 +4,13 @@ import pygame
 
 from model.coordinates import Coordinates
 from model.direction import Direction
+from model.turns import Turns
 
 PLAYER_SPRITE_SIZE = 45
 
 
 class Player:
-    def __init__(self, sprites: list, center_position: Coordinates, velocity=2, lives=3):
+    def __init__(self, sprites: list, center_position: Coordinates, turns: Turns, velocity=2, lives=3):
         self.sprites = sprites
         self.sprite_index = 0
         self.velocity = velocity
@@ -19,6 +20,7 @@ class Player:
         self.direction = Direction.LEFT
         self.power_up = False
         self.lives = lives
+        self.turns = turns
 
     def draw_face_left(self, screen):
         screen.blit(pygame.transform.flip(self.sprites[self.sprite_index], True, False),
@@ -57,3 +59,14 @@ class Player:
     def move_down(self):
         self.position_y += self.velocity
         self.coordinates.y += self.velocity
+
+    def snap_to_center(self, cell_width, cell_height):
+        self.coordinates.x = round(self.coordinates.x // cell_width) * cell_width + cell_width // 2
+        self.coordinates.y = round(self.coordinates.y // cell_height) * cell_height + cell_height // 2
+        self.position_x = self.coordinates.x - PLAYER_SPRITE_SIZE // 2
+        self.position_y = self.coordinates.y - PLAYER_SPRITE_SIZE // 2
+
+    def is_at_center(self, cell_width, cell_height):
+        return (self.coordinates.x - cell_width // 2) % cell_width == 0 and \
+            (self.coordinates.y - cell_height // 2) % cell_height == 0
+

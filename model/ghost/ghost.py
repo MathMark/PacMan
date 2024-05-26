@@ -30,6 +30,15 @@ class Ghost:
         self.board = space_params.board_definition.board
         self.home_corner = home_corner
 
+    def is_frightened(self):
+        return self.condition == self.Condition.FRIGHTENED
+
+    def is_eaten(self):
+        return self.condition == self.Condition.EATEN
+
+    def is_chasing(self):
+        return self.condition == self.Condition.CHASE
+
     def set_to_chase(self, target: Coordinates):
         self.target = target
         self.condition = self.Condition.CHASE
@@ -42,7 +51,6 @@ class Ghost:
         self.condition = self.Condition.EATEN
 
     def draw(self, screen):
-        print(f'{self.target.x}, {self.target.y}')
         if self.condition == self.Condition.CHASE:
             screen.blit(pygame.transform.flip(self.img, True, False),
                         (self.x_pos, self.y_pos))

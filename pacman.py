@@ -19,10 +19,7 @@ while run:
     timer.tick(FPS)
     screen.fill('black')
 
-    game_engine.draw_level(level_1)
-    game_engine.draw_player()
-    game_engine.draw_ghosts()
-    game_engine.draw_misc()
+    game_engine.tick()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

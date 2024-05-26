@@ -27,11 +27,11 @@ class LevelContentInitializer:
     def __load_player(self):
         player_images = []
         player_position = self.level.initial_positions.player_postion
-        initial_position = Coordinates(player_position[0] * self.segment_width, player_position[1] * self.segment_height)
+        initial_position = Coordinates(player_position[0] * self.segment_width + (self.segment_width // 2), player_position[1] * self.segment_height + (self.segment_height // 2))
         for i in range(1, 5):
             player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'),
                                                         (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
-        return Player(player_images, initial_position)
+        return Player(player_images, initial_position, Turns())
 
     def __load_ghosts(self, target: Coordinates):
         blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/red.png'), GHOST_SPRITE_SIZE)
