@@ -1,11 +1,11 @@
 from model.direction import Direction
-from model.ghost.ghost import Ghost
+from model.entity.ghost.ghost import Ghost
 
 
 class Clyde(Ghost):
     def move(self):
         self._teleport_if_board_limit_reached()
-        self._check_collisions()
+        self._check_borders_ahead()
         if self.direction == Direction.RIGHT:
             if self.target.x > self.x_pos and self.turns.right:
                 self._move_right()

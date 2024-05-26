@@ -4,11 +4,11 @@ from pygame import Surface
 from model.board_structure import BoardStructure
 from model.direction import Direction
 from model.eaten_object import EatenObject
-from model.ghost.ghost import Ghost
+from model.entity.ghost.ghost import Ghost
 from model.level_config import LevelConfig
 import math
 
-from model.player import Player
+from model.entity.player.player import Player
 
 PI = math.pi
 
@@ -50,8 +50,8 @@ class GameEngine:
 
     def __o(self):
         for ghost in self.ghosts:
-            if (abs(ghost.center_x - self.player.coordinates.x) < self.distance_factor) \
-                    and (abs(ghost.center_y - self.player.coordinates.y) < self.distance_factor):
+            if (abs(ghost.coordinates.x - self.player.coordinates.x) < self.distance_factor) \
+                    and (abs(ghost.coordinates.y - self.player.coordinates.y) < self.distance_factor):
                 if ghost.is_frightened():
                     ghost.set_to_eaten()
                 elif ghost.is_chasing():
