@@ -67,6 +67,6 @@ class Player:
         self.position_y = self.coordinates.y - PLAYER_SPRITE_SIZE // 2
 
     def is_at_center(self, cell_width, cell_height):
-        return (self.coordinates.x - cell_width // 2) % cell_width == 0 and \
-            (self.coordinates.y - cell_height // 2) % cell_height == 0
+        return (self.coordinates.x - cell_width // 2) % cell_width < 2 and \
+            (self.coordinates.y - cell_height // 2) % cell_height < 2
 

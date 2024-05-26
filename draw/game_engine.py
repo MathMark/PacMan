@@ -31,7 +31,7 @@ class GameEngine:
         self.flick = True
         self.player = player
         self.ghosts = ghosts
-        self.fudge_factor = 15
+        self.distance_factor = 10
         self.direction_command = Direction.LEFT
         pygame.font.init()
         self.game_font = pygame.font.SysFont('Comic Sans MS', 30)
@@ -42,27 +42,18 @@ class GameEngine:
         self.pause = False
 
     def tick(self):
-        self.debug()
         self.draw_level()
         self.draw_player()
         self.draw_ghosts()
         self.draw_misc()
         self.__o()
 
-    def debug(self):
-        for i in range(self.board_definition.width):
-            pygame.draw.line(self.screen, 'green',
-                             (i * self.segment_width, 0),
-                             (i * self.segment_width, self.board_definition.height * self.segment_height), 2)
-        for j in range(self.board_definition.height):
-            pygame.draw.line(self.screen, 'green',
-                             (0, j * self.segment_height),
-                             (self.board_definition.width * self.segment_width, j * self.segment_height), 2)
+
 
     def __o(self):
         for ghost in self.ghosts:
-            if (abs(ghost.center_x - self.player.coordinates.x) < self.fudge_factor) \
-                    and (abs(ghost.center_y - self.player.coordinates.y) < self.fudge_factor):
+            if (abs(ghost.center_x - self.player.coordinates.x) < self.distance_factor) \
+                    and (abs(ghost.center_y - self.player.coordinates.y) < self.distance_factor):
                 if ghost.is_frightened():
                     ghost.set_to_eaten()
                 elif ghost.is_chasing():
@@ -146,45 +137,28 @@ class GameEngine:
             self.direction_command = self.player.direction
 
     def __check_borders_ahead(self):
-        lf = 13
-        rf = 8
-        df = 13
-        uf = 13
         i = (self.player.coordinates.y // self.segment_height)
-        j = ((self.player.coordinates.x + lf) // self.segment_width) - 1
-        point = ((self.player.coordinates.x + lf) - self.segment_width, self.player.coordinates.y)
-        score_text = self.game_font.render(f'{self.board[i][j]}', True, 'purple')
-        self.screen.blit(score_text, point)
-        pygame.draw.circle(self.screen, 'white', point, 3)
-        pygame.draw.circle(self.screen, 'purple', (self.player.coordinates.x, self.player.coordinates.y), 2)
+        j = ((self.player.coordinates.x + self.distance_factor) // self.segment_width) - 1
         if self.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
             self.player.turns.left = True
         else:
             self.player.turns.left = False
 
         i = (self.player.coordinates.y // self.segment_height)
-        j = ((self.player.coordinates.x - rf) // self.segment_width) + 1
-        pygame.draw.circle(self.screen, 'white',
-                           ((self.player.coordinates.x - rf) + self.segment_width, self.player.coordinates.y), 3)
+        j = ((self.player.coordinates.x - self.distance_factor) // self.segment_width) + 1
         if self.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
             self.player.turns.right = True
         else:
             self.player.turns.right = False
-
-        i = ((self.player.coordinates.y + uf) // self.segment_height) - 1
+        i = ((self.player.coordinates.y + self.distance_factor) // self.segment_height) - 1
         j = (self.player.coordinates.x // self.segment_width)
-
-        pygame.draw.circle(self.screen, 'white',
-                           (self.player.coordinates.x, (self.player.coordinates.y + uf) - self.segment_height), 3)
         if self.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
             self.player.turns.up = True
         else:
             self.player.turns.up = False
 
-        i = ((self.player.coordinates.y - df) // self.segment_height) + 1
+        i = ((self.player.coordinates.y - self.distance_factor) // self.segment_height) + 1
         j = (self.player.coordinates.x // self.segment_width)
-        pygame.draw.circle(self.screen, 'white',
-                           (self.player.coordinates.x, (self.player.coordinates.y -df) + self.segment_height), 3)
         if self.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
             self.player.turns.down = True
         else:
@@ -306,3 +280,14 @@ class GameEngine:
                                      (j * self.segment_width, i * self.segment_height + (0.5 * self.segment_height)),
                                      (j * self.segment_width + self.segment_width,
                                       i * self.segment_height + (0.5 * self.segment_height)), 3)
+
+    # Draw additional grid to easily control object movements
+    def debug(self):
+        for i in range(self.board_definition.width):
+            pygame.draw.line(self.screen, 'green',
+                             (i * self.segment_width, 0),
+                             (i * self.segment_width, self.board_definition.height * self.segment_height), 2)
+        for j in range(self.board_definition.height):
+            pygame.draw.line(self.screen, 'green',
+                             (0, j * self.segment_height),
+                             (self.board_definition.width * self.segment_width, j * self.segment_height), 2)
