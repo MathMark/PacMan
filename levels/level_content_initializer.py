@@ -6,6 +6,7 @@ from pygame import Surface
 from draw.game_engine import SCORE_SCREEN_OFFSET, GameEngine
 from model.direction import Direction
 from model.ghost.blinky import Blinky
+from model.ghost.clyde import Clyde
 from model.ghost.ghost import GHOST_SPRITE_SIZE, Ghost
 from model.level_config import LevelConfig
 from model.player import PLAYER_SPRITE_SIZE, Player
@@ -45,13 +46,13 @@ class LevelContentInitializer:
         pinky_position = self.level.initial_positions.pinky_position
         inky_position = self.level.initial_positions.inky_position
         clyde_position = self.level.initial_positions.clyde_position
-        blinky = Blinky((blinky_position[0] * self.segment_width, blinky_position[1] * self.segment_height), blinky_img,
+        blinky = Ghost((blinky_position[0] * self.segment_width, blinky_position[1] * self.segment_height), blinky_img,
                        spooked_img, dead_img, Direction.RIGHT, target, turns, space_params)
         pinky = Ghost((pinky_position[0] * self.segment_width, pinky_position[1] * self.segment_height), pinky_img,
                        spooked_img, dead_img, Direction.UP, target, turns, space_params)
         inky = Ghost((inky_position[0] * self.segment_width, inky_position[1] * self.segment_height), inky_img,
                        spooked_img, dead_img, Direction.UP, target, turns, space_params)
-        clyde = Ghost((clyde_position[0] * self.segment_width, clyde_position[1] * self.segment_height), clyde_img,
+        clyde = Clyde((clyde_position[0] * self.segment_width, clyde_position[1] * self.segment_height), clyde_img,
                        spooked_img, dead_img, Direction.UP, target, turns, space_params)
 
         return [blinky, pinky, inky, clyde]

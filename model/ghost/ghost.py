@@ -100,6 +100,24 @@ class Ghost:
         else:
             self.turns.down = False
 
+    def _teleport_if_board_limit_reached(self):
+        i = (self.center_y // self.space_params.segment_height)
+        j = (self.center_x // self.space_params.segment_width)
+        if j >= self.space_params.board_definition.width - 1:
+            self.teleport(self.space_params.segment_width, self.center_y)
+        if j < 1:
+            self.teleport((self.space_params.board_definition.width - 1) * self.space_params.segment_width, self.center_y)
+        if i >= self.space_params.board_definition.height - 1:
+            self.teleport(self.center_x, self.space_params.segment_height)
+        if i < 1:
+            self.teleport(self.center_y, (self.space_params.board_definition.height - 1) * self.space_params.segment_height)
+
+    def teleport(self, x, y):
+        self.center_x = x
+        self.center_y = y
+        self.x_pos = self.center_x - GHOST_SPRITE_SIZE[0] // 2
+        self.y_pos = self.center_y - GHOST_SPRITE_SIZE[1] // 2
+
     class Condition(enum.Enum):
         CHASE = 0
         DEAD = 1

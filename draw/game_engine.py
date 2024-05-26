@@ -30,7 +30,7 @@ class GameEngine:
         self.flick = True
         self.player = player
         self.ghosts = ghosts
-        self.fudge_factor = 15
+        self.fudge_factor = 21
         self.direction_command = Direction.LEFT
         pygame.font.init()
         self.game_font = pygame.font.SysFont('Comic Sans MS', 30)
