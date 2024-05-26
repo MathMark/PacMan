@@ -80,17 +80,17 @@ class GameEngine:
 
     def __check_turns_allowed(self):
         if self.direction_command == Direction.LEFT:
-            i = (self.player.center_y // self.segment_height)
-            j = ((self.player.center_x - self.fudge_factor) // self.segment_width)
+            i = (self.player.coordinates.y // self.segment_height)
+            j = ((self.player.coordinates.x - self.fudge_factor) // self.segment_width)
         elif self.direction_command == Direction.RIGHT:
-            i = (self.player.center_y // self.segment_height)
-            j = ((self.player.center_x + self.fudge_factor) // self.segment_width)
+            i = (self.player.coordinates.y // self.segment_height)
+            j = ((self.player.coordinates.x + self.fudge_factor) // self.segment_width)
         elif self.direction_command == Direction.UP:
-            i = ((self.player.center_y - self.fudge_factor) // self.segment_height)
-            j = (self.player.center_x // self.segment_width)
+            i = ((self.player.coordinates.y - self.fudge_factor) // self.segment_height)
+            j = (self.player.coordinates.x // self.segment_width)
         else:  # direction == DOWN
-            i = ((self.player.center_y + self.fudge_factor) // self.segment_height)
-            j = (self.player.center_x // self.segment_width)
+            i = ((self.player.coordinates.y + self.fudge_factor) // self.segment_height)
+            j = (self.player.coordinates.x // self.segment_width)
         if self.board_definition.check_coordinate_within(i, j):
             if self.board[i][j] < 3:
                 self.player.direction = self.direction_command
@@ -102,12 +102,12 @@ class GameEngine:
             if self.power_up_counter <= 0:
                 self.player.power_up = False
                 self.power_up_counter = 0
-                self.__set_ghosts_normal()
+                self.__set_ghosts_to_chase()
         self.power_up_counter -= 1
 
     def __eat(self):
-        i = (self.player.center_y // self.segment_height)
-        j = (self.player.center_x // self.segment_width)
+        i = (self.player.coordinates.y // self.segment_height)
+        j = (self.player.coordinates.x // self.segment_width)
         if self.board[i][j] == BoardStructure.DOT.value:
             self.board[i][j] = 0
             self.level.score += 10
@@ -116,19 +116,19 @@ class GameEngine:
             self.level.score += 50
             self.player.power_up = True
             self.power_up_counter = self.level.power_up_limit
-            self.__set_ghosts_dead()
+            self.__set_ghosts_frightened()
 
-    def __set_ghosts_dead(self):
+    def __set_ghosts_frightened(self):
         for ghost in self.ghosts:
-            ghost.set_to_dead()
+            ghost.set_to_frightened()
 
-    def __set_ghosts_spooked(self):
+    def __set_ghosts_eaten(self):
         for ghost in self.ghosts:
-            ghost.set_to_spooked()
+            ghost.set_to_eaten()
 
-    def __set_ghosts_normal(self):
+    def __set_ghosts_to_chase(self):
         for ghost in self.ghosts:
-            ghost.set_to_chase()
+            ghost.set_to_chase(self.player.coordinates)
 
     def __teleport_if_board_limit_reached(self):
         i = (self.player.position_y // self.segment_height)
@@ -144,24 +144,24 @@ class GameEngine:
 
     def __is_collision_down(self):
         # a bit below player center coordinate
-        coordinate_x = (self.player.center_y + self.fudge_factor) // self.segment_height
-        coordinate_y = self.player.center_x // self.segment_width
+        coordinate_x = (self.player.coordinates.y + self.fudge_factor) // self.segment_height
+        coordinate_y = self.player.coordinates.x // self.segment_width
         return self.board[coordinate_x][coordinate_y] >= 3
 
     def __is_collision_up(self):
         # a bit upper player center coordinate
-        coordinate_x = (self.player.center_y - self.fudge_factor) // self.segment_height
-        coordinate_y = self.player.center_x // self.segment_width
+        coordinate_x = (self.player.coordinates.y - self.fudge_factor) // self.segment_height
+        coordinate_y = self.player.coordinates.x // self.segment_width
         return self.board[coordinate_x][coordinate_y] >= 3
 
     def __is_collision_left(self):
-        coordinate_x = self.player.center_y // self.segment_height
-        coordinate_y = (self.player.center_x - self.fudge_factor) // self.segment_width
+        coordinate_x = self.player.coordinates.y // self.segment_height
+        coordinate_y = (self.player.coordinates.x - self.fudge_factor) // self.segment_width
         return self.board[coordinate_x][coordinate_y] >= 3
 
     def __is_collision_right(self):
-        coordinate_x = self.player.center_y // self.segment_height
-        coordinate_y = (self.player.center_x + self.fudge_factor) // self.segment_width
+        coordinate_x = self.player.coordinates.y // self.segment_height
+        coordinate_y = (self.player.coordinates.x + self.fudge_factor) // self.segment_width
         if self.board_definition.check_coordinate_within(coordinate_x, coordinate_y):
             return self.board[coordinate_x][coordinate_y] >= 3
         return False
@@ -184,6 +184,20 @@ class GameEngine:
                               self.screen.get_height() - SCORE_SCREEN_OFFSET))
 
     def draw_level(self, level_config: LevelConfig):
+
+        # for i in range(self.board_width):
+        #     pygame.draw.line(self.screen, 'green',
+        #                      (i * self.segment_width + (0.5 * self.segment_width), 0),
+        #                      (i * self.segment_width + (0.5 * self.segment_width), self.board_height * self.segment_height),
+        #                      2)
+        # for j in range(self.board_height):
+        #     pygame.draw.line(self.screen, 'green',
+        #                      (0, j * self.segment_height + (0.5 * self.segment_height)),
+        #                      (self.board_width * self.segment_width, j * self.segment_height + (0.5 * self.segment_height)),
+        #                      2)
+        #
+
+
         self.__calculate_flick()
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
