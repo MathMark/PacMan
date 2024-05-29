@@ -41,7 +41,7 @@ class Player(Entity):
         self.__calculate_sprite_index()
         self._teleport_if_board_limit_reached()
 
-        turned = self.__check_turns_allowed(direction_command)
+        turned = self._align_movement_to_cell_center(direction_command)
 
         if self.direction == Direction.LEFT:
             self.__draw_face_left(screen)
@@ -93,37 +93,3 @@ class Player(Entity):
     def __draw_face_up(self, screen):
         screen.blit(pygame.transform.rotate(self.sprites[self.sprite_index], 90),
                     (self.x_pos, self.y_pos))
-
-    def __check_turns_allowed(self, direction_command):
-        if direction_command == Direction.LEFT and self.turns.left:
-            if self.direction == Direction.RIGHT:
-                self.direction = direction_command
-            else:
-                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
-                    self.direction = direction_command
-            return True
-        elif direction_command == Direction.RIGHT and self.turns.right:
-            if self.direction == Direction.LEFT:
-                self.direction = direction_command
-            else:
-                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
-                    self.direction = direction_command
-            return True
-        elif direction_command == Direction.UP and self.turns.up:
-            if self.direction == Direction.DOWN:
-                self.direction = direction_command
-            else:
-                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
-                    self.direction = direction_command
-            return True
-        elif direction_command == Direction.DOWN and self.turns.down:
-            if self.direction == Direction.UP:
-                self.direction = direction_command
-            else:
-                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
-                    self.direction = direction_command
-            return True
-        else:
-            return False
-
-

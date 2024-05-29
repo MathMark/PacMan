@@ -32,6 +32,8 @@ class Entity:
         self.y_pos += self.velocity
         self.coordinates.y += self.velocity
 
+    # Checks next cell based on current entity position and direction and
+    # permits or prohibits to turn in certain direction depending on obstacles ahead
     def _check_borders_ahead(self):
         i = (self.coordinates.y // self.space_params.segment_height)
         j = ((self.coordinates.x + DISTANCE_FACTOR) // self.space_params.segment_width) - 1
@@ -60,6 +62,39 @@ class Entity:
             self.turns.down = True
         else:
             self.turns.down = False
+
+    # Ensures entity moves strictly by cell centers and not blocked in corners.
+    def _align_movement_to_cell_center(self, direction_command):
+        if direction_command == Direction.LEFT and self.turns.left:
+            if self.direction == Direction.RIGHT:
+                self.direction = direction_command
+            else:
+                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
+                    self.direction = direction_command
+            return True
+        elif direction_command == Direction.RIGHT and self.turns.right:
+            if self.direction == Direction.LEFT:
+                self.direction = direction_command
+            else:
+                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
+                    self.direction = direction_command
+            return True
+        elif direction_command == Direction.UP and self.turns.up:
+            if self.direction == Direction.DOWN:
+                self.direction = direction_command
+            else:
+                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
+                    self.direction = direction_command
+            return True
+        elif direction_command == Direction.DOWN and self.turns.down:
+            if self.direction == Direction.UP:
+                self.direction = direction_command
+            else:
+                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
+                    self.direction = direction_command
+            return True
+        else:
+            return False
 
     def _snap_to_center(self, cell_width, cell_height):
         self.coordinates.x = round(self.coordinates.x // cell_width) * cell_width + cell_width // 2

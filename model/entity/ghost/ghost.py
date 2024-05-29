@@ -53,7 +53,7 @@ class Ghost(Entity):
             screen.blit(pygame.transform.flip(self.eaten_img, True, False),
                         (self.x_pos, self.y_pos))
 
-    def move(self):
+    def follow_target(self):
         pass
 
     class Condition(enum.Enum):

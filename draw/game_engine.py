@@ -73,7 +73,7 @@ class GameEngine:
     def draw_ghosts(self):
         for ghost in self.ghosts:
             ghost.draw(self.screen)
-            ghost.move()
+            ghost.follow_target()
 
     def __calc_power_up_counter(self):
         if self.player.power_up:
