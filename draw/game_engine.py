@@ -46,9 +46,9 @@ class GameEngine:
         self.draw_player()
         self.draw_ghosts()
         self.draw_misc()
-        self.__o()
+        self.check_ghosts_and_player_collision()
 
-    def __o(self):
+    def check_ghosts_and_player_collision(self):
         for ghost in self.ghosts:
             if (abs(ghost.coordinates.x - self.player.coordinates.x) < self.distance_factor) \
                     and (abs(ghost.coordinates.y - self.player.coordinates.y) < self.distance_factor):
