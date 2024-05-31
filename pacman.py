@@ -1,22 +1,9 @@
 import pygame
 
-from draw.draw_manager import DrawManager
-from levels.level_1 import level_1
+from global_variables import WIDTH, HEIGHT
+from levels.level_1 import *
+from levels.level_content_initializer import LevelContentInitializer
 from model.direction import Direction
-from model.player import Player, PLAYER_SPRITE_SIZE
-
-
-def load_player():
-    player_images = []
-    for i in range(1, 5):
-        player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'),
-                                                    (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
-    return Player(player_images, WIDTH // 2, HEIGHT // 2)
-
-
-fps = 60
-WIDTH = 900
-HEIGHT = 950
 
 run = True
 
@@ -24,34 +11,28 @@ pygame.init()
 timer = pygame.time.Clock()
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 
-
-player = load_player()
-direction = Direction.LEFT
-
-draw_manager = DrawManager(screen, level_1, player)
-
-center_x = player.position_x + 23
-center_y = player.position_y + 24
+level1_init = LevelContentInitializer(level_1, screen)
+game_engine = level1_init.init_game_engine()
 
 while run:
-    timer.tick(fps)
+
+    timer.tick(FPS)
     screen.fill('black')
 
-    draw_manager.draw_level(level_1)
-    draw_manager.draw_player()
+    game_engine.tick()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
-                player.direction = Direction.LEFT
+                game_engine.direction_command = Direction.LEFT
             if event.key == pygame.K_RIGHT:
-                player.direction = Direction.RIGHT
+                game_engine.direction_command = Direction.RIGHT
             if event.key == pygame.K_DOWN:
-                player.direction = Direction.DOWN
+                game_engine.direction_command = Direction.DOWN
             if event.key == pygame.K_UP:
-                player.direction = Direction.UP
+                game_engine.direction_command = Direction.UP
     pygame.display.flip()
 
 pygame.quit()
