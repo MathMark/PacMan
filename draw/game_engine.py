@@ -43,7 +43,6 @@ class GameEngine:
         self.run_count = 0
 
     def tick(self):
-        self.debug()
         self.draw_level()
         self.draw_player()
         self.draw_ghosts()

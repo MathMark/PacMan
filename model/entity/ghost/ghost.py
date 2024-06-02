@@ -92,11 +92,11 @@ class Ghost(Entity):
                 if (next_node == end):
                     return path + [next_node]
                 if (next_node[0] >= 0 and next_node[1] >= 0 and
-                        next_node[1] < visited.shape[0] and next_node[0] < visited.shape[1] and
+                        next_node[1] < len(board) and next_node[0] < len(board[0]) and
                         (board[next_node[1]][next_node[0]] < 3 or board[next_node[1]][next_node[0]] == 9)
-                        and not visited[next_node]):
+                        and not visited[next_node[1]][next_node[0]]):
                     print(f'i: {next_node[0]}, j: {next_node[1]}, val: {board[next_node[1]][next_node[0]]}')
-                    visited[next_node] = True
+                    visited[next_node[1]][next_node[0]] = True
                     queue.put((next_node, path + [next_node]))
         return []
 
