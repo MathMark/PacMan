@@ -1,4 +1,4 @@
-from global_variables import SPRITE_SIZE, DISTANCE_FACTOR
+from constants import SPRITE_SIZE, DISTANCE_FACTOR
 from model.coordinates import Coordinates
 from model.direction import Direction
 from model.space_params.space_params import SpaceParams

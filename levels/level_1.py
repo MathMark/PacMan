@@ -2,7 +2,7 @@
 # 4 = horizontal line, 5 = top right, 6 = top left, 7 = bot left, 8 = bot right
 # 9 = gate
 
-from global_variables import FPS
+from constants import FPS
 from model.board_definition import BoardDefinition
 from model.level_config import LevelConfig
 from model.positions import InitialPositions

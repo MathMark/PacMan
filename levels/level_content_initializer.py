@@ -65,7 +65,7 @@ class LevelContentInitializer:
                                                   clyde_position[1] * self.segment_height + (
                                                           self.segment_height // 2)),
                       img=clyde_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                      target=target, turns=turns, space_params=space_params, home_corner=Coordinates(5, 5))
+                      target=target, turns=turns, space_params=space_params, home_corner=Coordinates(0, 0))
 
         return [blinky, pinky, inky, clyde]
 

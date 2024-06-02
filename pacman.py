@@ -1,6 +1,6 @@
 import pygame
 
-from global_variables import WIDTH, HEIGHT
+from constants import WIDTH, HEIGHT
 from levels.level_1 import *
 from levels.level_content_initializer import LevelContentInitializer
 from model.direction import Direction
