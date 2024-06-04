@@ -1,6 +1,7 @@
 import pygame
 from pygame import Surface
 from model.board_structure import BoardStructure
+from model.coordinates import Coordinates
 from model.direction import Direction
 from model.eaten_object import EatenObject
 from model.entity.ghost.ghost import Ghost
@@ -13,7 +14,6 @@ PI = math.pi
 
 FLICK_FREQUENCY = 20
 SCORE_SCREEN_OFFSET = 50
-RUN_FREQUENCY = 80
 
 
 class GameEngine:
@@ -39,8 +39,6 @@ class GameEngine:
         self.score_coordinates = (SCORE_SCREEN_OFFSET, (self.screen.get_height() - SCORE_SCREEN_OFFSET))
         self.powerup_circle_coordinates = (250, ((self.screen.get_height() - SCORE_SCREEN_OFFSET) + 15))
         self.pause = False
-        self.y = 0
-        self.run_count = 0
 
     def tick(self):
         self.draw_level()
@@ -74,10 +72,11 @@ class GameEngine:
     def draw_ghosts(self):
         for ghost in self.ghosts:
             ghost.draw(self.screen)
-            if ghost.condition == Ghost.Condition.EATEN:
+            if ghost.is_eaten():
                 ghost.runaway()
             else:
                 ghost.follow_target()
+
 
     def __calc_power_up_counter(self):
         if self.player.power_up:
@@ -97,7 +96,8 @@ class GameEngine:
 
     def __set_ghosts_to_chase(self):
         for ghost in self.ghosts:
-            ghost.set_to_chase(self.player.coordinates)
+            if not ghost.is_eaten():
+                ghost.set_to_chase()
 
     def __calculate_flick(self):
         self.flicker_counter += 1

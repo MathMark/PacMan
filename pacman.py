@@ -2,7 +2,7 @@ import sys
 
 import pygame
 
-from constants import WIDTH, HEIGHT
+from settings import WIDTH, HEIGHT, RESOLUTION
 from levels.level_1 import *
 from levels.level_content_initializer import LevelContentInitializer
 from model.direction import Direction
@@ -11,7 +11,7 @@ from model.direction import Direction
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode([WIDTH, HEIGHT])
+        self.screen = pygame.display.set_mode(RESOLUTION)
         self.timer = pygame.time.Clock()
         level1_init = LevelContentInitializer(level_1, self.screen)
         self.game_engine = level1_init.init_game_engine()

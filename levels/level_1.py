@@ -2,7 +2,7 @@
 # 4 = horizontal line, 5 = top right, 6 = top left, 7 = bot left, 8 = bot right
 # 9 = gate
 
-from constants import FPS
+from settings import FPS
 from model.board_definition import BoardDefinition
 from model.level_config import LevelConfig
 from model.positions import InitialPositions
@@ -47,7 +47,7 @@ board_definition = BoardDefinition(board)
 power_up_limit = 10 * FPS  # 10 seconds
 
 positions = InitialPositions(player_position=(15, 18),
-                             blinky_position=(12, 12),
+                             blinky_position=(3, 2),
                              pinky_position=(13, 15),
                              inky_position=(14, 15),
                              clyde_position=(15, 15))

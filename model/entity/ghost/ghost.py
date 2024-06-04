@@ -1,7 +1,5 @@
 import enum
 from queue import Queue
-from typing import Tuple
-
 import numpy as np
 import pygame
 from model.coordinates import Coordinates
@@ -11,7 +9,7 @@ from model.space_params.space_params import SpaceParams
 from model.turns import Turns
 
 GHOST_SPRITE_SIZE = (45, 45)
-
+RUN_POSITION_CHANGE_FREQUENCY = 2
 
 class Ghost(Entity):
     def __init__(self, center_position: Coordinates, img, frightened_img, eaten_img, target: Coordinates,
@@ -23,9 +21,11 @@ class Ghost(Entity):
         self.frightened_img = frightened_img
         self.direction = Direction.UP
         self.target = target
+        self.current_target = self.target
         self.condition = self.Condition.CHASE
         self.home_corner = home_corner
         self.ghost_run_path = Queue()
+        self.c = 0
 
     def is_frightened(self):
         return self.condition == self.Condition.FRIGHTENED
@@ -36,13 +36,15 @@ class Ghost(Entity):
     def is_chasing(self):
         return self.condition == self.Condition.CHASE
 
-    def set_to_chase(self, target: Coordinates):
-        self.target = target
+    def set_to_chase(self):
+        self.velocity = 2
+        self.current_target = self.target
         self.condition = self.Condition.CHASE
 
     def set_to_frightened(self):
+        self.velocity = 1
         self.condition = self.Condition.FRIGHTENED
-        self.target = self.home_corner
+        self.current_target = self.home_corner
 
     def set_to_eaten(self):
         self.condition = self.Condition.EATEN
@@ -57,7 +59,7 @@ class Ghost(Entity):
         elif self.condition == self.Condition.FRIGHTENED:
             screen.blit(pygame.transform.flip(self.frightened_img, True, False),
                         (self.x_pos, self.y_pos))
-        else: #eaten
+        else:  # eaten
             screen.blit(pygame.transform.flip(self.eaten_img, True, False),
                         (self.x_pos, self.y_pos))
 
@@ -66,12 +68,17 @@ class Ghost(Entity):
 
     def runaway(self):
         if self.ghost_run_path.empty():
-            self.condition = Ghost.Condition.CHASE
+            self.direction = Direction.UP
+            self.set_to_chase()
         else:
-            next_node = self.ghost_run_path.get()
-            self.x_pos = next_node[0] * self.space_params.segment_width + (self.space_params.segment_width // 2)
-            self.y_pos = next_node[1] * self.space_params.segment_height + (self.space_params.segment_height // 2)
-
+            if self.c % RUN_POSITION_CHANGE_FREQUENCY == 0:
+                next_node = self.ghost_run_path.get()
+                self.x_pos = next_node[0] * self.space_params.segment_width + (self.space_params.segment_width // 2)
+                self.y_pos = next_node[1] * self.space_params.segment_height + (self.space_params.segment_height // 2)
+            if self.c == RUN_POSITION_CHANGE_FREQUENCY:
+                self.c = 0
+            else:
+                self.c += 1
 
     def find_path(self, target_point: Coordinates):
         # BFS algorithm to find the shortest path
@@ -91,15 +98,13 @@ class Ghost(Entity):
                 next_node = (node[0] + dx, node[1] + dy)
                 if (next_node == end):
                     return path + [next_node]
-                if (next_node[0] >= 0 and next_node[1] >= 0 and
-                        next_node[1] < len(board) and next_node[0] < len(board[0]) and
+                if ((next_node[0] >= 0 and next_node[1] >= 0) and
+                        (next_node[1] < len(board) and next_node[0] < len(board[0])) and
                         (board[next_node[1]][next_node[0]] < 3 or board[next_node[1]][next_node[0]] == 9)
                         and not visited[next_node[1]][next_node[0]]):
-                    print(f'i: {next_node[0]}, j: {next_node[1]}, val: {board[next_node[1]][next_node[0]]}')
                     visited[next_node[1]][next_node[0]] = True
                     queue.put((next_node, path + [next_node]))
         return []
-
 
     def _move(self, direction_command: Direction):
         self._teleport_if_board_limit_reached()
@@ -128,10 +133,7 @@ class Ghost(Entity):
             else:
                 self._snap_to_center(self.space_params.segment_width, self.space_params.segment_height)
 
-
     class Condition(enum.Enum):
         CHASE = 0
         EATEN = 1
         FRIGHTENED = 2
-
-
