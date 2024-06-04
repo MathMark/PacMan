@@ -1,7 +1,6 @@
 import pygame
 from pygame import Surface
 from model.board_structure import BoardStructure
-from model.coordinates import Coordinates
 from model.direction import Direction
 from model.eaten_object import EatenObject
 from model.entity.ghost.ghost import Ghost
@@ -171,8 +170,8 @@ class GameEngine:
                                      (j * self.segment_width + self.segment_width,
                                       i * self.segment_height + (0.5 * self.segment_height)), 3)
 
-    # Draw additional grid to easily control object movements
     def debug(self):
+        # Draw additional grid to easily control object movements
         for i in range(self.board_definition.width):
             pygame.draw.line(self.screen, 'green',
                              (i * self.segment_width, 0),
