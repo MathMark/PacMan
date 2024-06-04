@@ -7,6 +7,7 @@ from model.direction import Direction
 from model.entity.entity import Entity
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
+from settings import SPRITE_SIZE
 
 GHOST_SPRITE_SIZE = (45, 45)
 RUN_POSITION_CHANGE_FREQUENCY = 2
@@ -55,13 +56,13 @@ class Ghost(Entity):
     def draw(self, screen):
         if self.condition == self.Condition.CHASE:
             screen.blit(pygame.transform.flip(self.img, True, False),
-                        (self.x_pos, self.y_pos))
+                        (self.center_x_pos, self.center_y_pos))
         elif self.condition == self.Condition.FRIGHTENED:
             screen.blit(pygame.transform.flip(self.frightened_img, True, False),
-                        (self.x_pos, self.y_pos))
+                        (self.center_x_pos, self.center_y_pos))
         else:  # eaten
             screen.blit(pygame.transform.flip(self.eaten_img, True, False),
-                        (self.x_pos, self.y_pos))
+                        (self.center_x_pos, self.center_y_pos))
 
     def follow_target(self):
         pass
@@ -69,12 +70,14 @@ class Ghost(Entity):
     def runaway(self):
         if self.ghost_run_path.empty():
             self.direction = Direction.UP
+            self.turns = Turns()
             self.set_to_chase()
+            self.coordinates = Coordinates(self.center_x_pos + SPRITE_SIZE // 2, self.center_y_pos + SPRITE_SIZE // 2)
         else:
             if self.c % RUN_POSITION_CHANGE_FREQUENCY == 0:
                 next_node = self.ghost_run_path.get()
-                self.x_pos = next_node[0] * self.space_params.segment_width + (self.space_params.segment_width // 2)
-                self.y_pos = next_node[1] * self.space_params.segment_height + (self.space_params.segment_height // 2)
+                self.center_x_pos = next_node[0] * self.space_params.segment_width + (self.space_params.segment_width // 2)
+                self.center_y_pos = next_node[1] * self.space_params.segment_height + (self.space_params.segment_height // 2)
             if self.c == RUN_POSITION_CHANGE_FREQUENCY:
                 self.c = 0
             else:
@@ -84,8 +87,8 @@ class Ghost(Entity):
         # BFS algorithm to find the shortest path
         board = self.space_params.board_definition.board
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        x = (self.x_pos // self.space_params.segment_width)
-        y = (self.y_pos // self.space_params.segment_height)
+        x = (self.center_x_pos // self.space_params.segment_width)
+        y = (self.center_y_pos // self.space_params.segment_height)
         start = (x, y)
         end = (target_point.x, target_point.y)
         visited = np.zeros_like(board, dtype=bool)

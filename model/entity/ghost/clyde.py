@@ -1,9 +1,3 @@
-from queue import Queue
-from typing import Tuple
-
-import numpy as np
-
-from model.coordinates import Coordinates
 from model.direction import Direction
 from model.entity.ghost.ghost import Ghost
 
@@ -12,14 +6,14 @@ class Clyde(Ghost):
     def follow_target(self):
         self._check_borders_ahead()
         if self.direction == Direction.RIGHT:
-            if self.target.x > self.x_pos and self.turns.right:
+            if self.target.x > self.center_x_pos and self.turns.right:
                 self._move(Direction.RIGHT)
             elif not self.turns.right:
-                if self.target.y > self.y_pos and self.turns.down:
+                if self.target.y > self.center_y_pos and self.turns.down:
                     self._move(Direction.DOWN)
-                elif self.target.y < self.y_pos and self.turns.up:
+                elif self.target.y < self.center_y_pos and self.turns.up:
                     self._move(Direction.UP)
-                elif self.target.x < self.x_pos and self.turns.left:
+                elif self.target.x < self.center_x_pos and self.turns.left:
                     self._move(Direction.LEFT)
                 elif self.turns.down:
                     self._move(Direction.DOWN)
@@ -28,23 +22,23 @@ class Clyde(Ghost):
                 elif self.turns.left:
                     self._move(Direction.LEFT)
             elif self.turns.right:
-                if self.target.y > self.y_pos and self.turns.down:
+                if self.target.y > self.center_y_pos and self.turns.down:
                     self._move(Direction.DOWN)
-                if self.target.y < self.y_pos and self.turns.up:
+                if self.target.y < self.center_y_pos and self.turns.up:
                     self._move(Direction.UP)
                 else:
                     self._move(Direction.RIGHT)
         elif self.direction == Direction.LEFT:
-            if self.target.y > self.y_pos and self.turns.down:
+            if self.target.y > self.center_y_pos and self.turns.down:
                 self._move(Direction.DOWN)
-            elif self.target.x < self.x_pos and self.turns.left:
+            elif self.target.x < self.center_x_pos and self.turns.left:
                 self._move(Direction.LEFT)
             elif not self.turns.left:
-                if self.target.y > self.y_pos and self.turns.down:
+                if self.target.y > self.center_y_pos and self.turns.down:
                     self._move(Direction.DOWN)
-                elif self.target.y < self.y_pos and self.turns.up:
+                elif self.target.y < self.center_y_pos and self.turns.up:
                     self._move(Direction.UP)
-                elif self.target.x > self.x_pos and self.turns.right:
+                elif self.target.x > self.center_x_pos and self.turns.right:
                     self._move(Direction.RIGHT)
                 elif self.turns.down:
                     self._move(Direction.DOWN)
@@ -53,24 +47,24 @@ class Clyde(Ghost):
                 elif self.turns.right:
                     self._move(Direction.RIGHT)
             elif self.turns.left:
-                if self.target.y > self.y_pos and self.turns.down:
+                if self.target.y > self.center_y_pos and self.turns.down:
                     self._move(Direction.DOWN)
-                if self.target.y < self.y_pos and self.turns.up:
+                if self.target.y < self.center_y_pos and self.turns.up:
                     self._move(Direction.UP)
                 else:
                     self._move(Direction.LEFT)
         elif self.direction == Direction.UP:
-            if self.target.x < self.x_pos and self.turns.left:
+            if self.target.x < self.center_x_pos and self.turns.left:
                 self._move(Direction.LEFT)
-            elif self.target.y < self.y_pos and self.turns.up:
+            elif self.target.y < self.center_y_pos and self.turns.up:
                 self.direction = Direction.UP
                 self._move(Direction.UP)
             elif not self.turns.up:
-                if self.target.x > self.x_pos and self.turns.right:
+                if self.target.x > self.center_x_pos and self.turns.right:
                     self._move(Direction.RIGHT)
-                elif self.target.x < self.x_pos and self.turns.left:
+                elif self.target.x < self.center_x_pos and self.turns.left:
                     self._move(Direction.LEFT)
-                elif self.target.y > self.y_pos and self.turns.down:
+                elif self.target.y > self.center_y_pos and self.turns.down:
                     self._move(Direction.DOWN)
                 elif self.turns.left:
                     self._move(Direction.LEFT)
@@ -79,21 +73,21 @@ class Clyde(Ghost):
                 elif self.turns.right:
                     self._move(Direction.RIGHT)
             elif self.turns.up:
-                if self.target.x > self.x_pos and self.turns.right:
+                if self.target.x > self.center_x_pos and self.turns.right:
                     self._move(Direction.RIGHT)
-                elif self.target.x < self.x_pos and self.turns.left:
+                elif self.target.x < self.center_x_pos and self.turns.left:
                     self._move(Direction.LEFT)
                 else:
                     self._move(Direction.UP)
         elif self.direction == Direction.DOWN:
-            if self.target.y > self.y_pos and self.turns.down:
+            if self.target.y > self.center_y_pos and self.turns.down:
                 self._move(Direction.DOWN)
             elif not self.turns.down:
-                if self.target.x > self.x_pos and self.turns.right:
+                if self.target.x > self.center_x_pos and self.turns.right:
                     self._move(Direction.RIGHT)
-                elif self.target.x < self.x_pos and self.turns.left:
+                elif self.target.x < self.center_x_pos and self.turns.left:
                     self._move(Direction.LEFT)
-                elif self.target.y < self.y_pos and self.turns.up:
+                elif self.target.y < self.center_y_pos and self.turns.up:
                     self._move(Direction.UP)
                 elif self.turns.up:
                     self._move(Direction.UP)
@@ -102,9 +96,9 @@ class Clyde(Ghost):
                 elif self.turns.right:
                     self._move(Direction.RIGHT)
             elif self.turns.down:
-                if self.target.x > self.x_pos and self.turns.right:
+                if self.target.x > self.center_x_pos and self.turns.right:
                     self._move(Direction.RIGHT)
-                elif self.target.x < self.x_pos and self.turns.left:
+                elif self.target.x < self.center_x_pos and self.turns.left:
                     self._move(Direction.LEFT)
                 else:
                     self._move(Direction.RIGHT)
