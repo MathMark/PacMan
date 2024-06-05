@@ -6,6 +6,7 @@ from model.coordinates import Coordinates
 from model.entity.ghost.blinky import Blinky
 from model.entity.ghost.clyde import Clyde
 from model.entity.ghost.ghost import GHOST_SPRITE_SIZE, Ghost
+from model.entity.ghost.pinky import Pinky
 from model.level_config import LevelConfig
 from model.entity.player.player import PLAYER_SPRITE_SIZE, Player
 from model.space_params.space_params import SpaceParams
@@ -50,7 +51,7 @@ class LevelContentInitializer:
                                                                self.segment_height // 2)),
                        img=blinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
                        target=target, turns=turns, space_params=space_params, home_corner=Coordinates(5, 5))
-        pinky = Ghost(center_position=Coordinates(PINKY_X * self.segment_width + (self.segment_width // 2),
+        pinky = Pinky(center_position=Coordinates(PINKY_X * self.segment_width + (self.segment_width // 2),
                                                   PINKY_Y * self.segment_height + (
                                                           self.segment_height // 2)),
                       img=pinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
