@@ -3,6 +3,7 @@ from pygame import Surface
 
 from draw.game_engine import SCORE_SCREEN_OFFSET, GameEngine
 from model.coordinates import Coordinates
+from model.entity.ghost.blinky import Blinky
 from model.entity.ghost.clyde import Clyde
 from model.entity.ghost.ghost import GHOST_SPRITE_SIZE, Ghost
 from model.level_config import LevelConfig
@@ -44,7 +45,7 @@ class LevelContentInitializer:
         turns = Turns()
         space_params = SpaceParams(self.level.board_definition, self.segment_width, self.segment_height, 21)
 
-        blinky = Ghost(center_position=Coordinates(BLINKY_X * self.segment_width + (self.segment_width // 2),
+        blinky = Blinky(center_position=Coordinates(BLINKY_X * self.segment_width + (self.segment_width // 2),
                                                    BLINKY_Y * self.segment_height + (
                                                                self.segment_height // 2)),
                        img=blinky_img, frightened_img=frightened_img, eaten_img=eaten_img,

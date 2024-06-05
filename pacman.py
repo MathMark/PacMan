@@ -2,7 +2,7 @@ import sys
 
 import pygame
 
-from settings import WIDTH, HEIGHT, RESOLUTION
+from settings import RESOLUTION
 from levels.level_1 import *
 from levels.level_content_initializer import LevelContentInitializer
 from model.direction import Direction

@@ -32,9 +32,10 @@ class Entity:
         self.center_y_pos += self.velocity
         self.coordinates.y += self.velocity
 
-    # Checks next cell based on current entity position and direction and
-    # permits or prohibits to turn in certain direction depending on obstacles ahead
     def _check_borders_ahead(self):
+        # Checks next cell based on current entity position and direction and
+        # permits or prohibits to turn in certain direction depending on obstacles ahead
+
         i = (self.coordinates.y // self.space_params.segment_height)
         j = ((self.coordinates.x + DISTANCE_FACTOR) // self.space_params.segment_width) - 1
         if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
@@ -63,8 +64,9 @@ class Entity:
         else:
             self.turns.down = False
 
-    # Ensures entity moves strictly by cell centers and not blocked in corners.
     def _align_movement_to_cell_center(self, direction_command):
+        # Ensures entity moves strictly by cell centers and not blocked in corners.
+
         if direction_command == Direction.LEFT and self.turns.left:
             if self.direction == Direction.RIGHT:
                 self.direction = direction_command
