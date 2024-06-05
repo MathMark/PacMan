@@ -24,8 +24,8 @@ class GameEngine:
         self.board = self.board_definition.board
         self.board_width = self.board_definition.width
         self.board_height = self.board_definition.height
-        self.segment_height = ((screen.get_height() - SCORE_SCREEN_OFFSET) // self.board_height)
-        self.segment_width = (screen.get_width() // self.board_width)
+        self.tile_height = ((screen.get_height() - SCORE_SCREEN_OFFSET) // self.board_height)
+        self.tile_width = (screen.get_width() // self.board_width)
         self.flicker_counter = 0
         self.flick = True
         self.player = player
@@ -40,6 +40,7 @@ class GameEngine:
         self.pause = False
 
     def tick(self):
+        self.debug()
         self.draw_level()
         self.draw_player()
         self.draw_ghosts()
@@ -48,8 +49,8 @@ class GameEngine:
 
     def check_ghosts_and_player_collision(self):
         for ghost in self.ghosts:
-            if (abs(ghost.coordinates.x - self.player.coordinates.x) < self.distance_factor) \
-                    and (abs(ghost.coordinates.y - self.player.coordinates.y) < self.distance_factor):
+            if (abs(ghost.location_x - self.player.location_x) < self.distance_factor) \
+                    and (abs(ghost.location_y - self.player.location_y) < self.distance_factor):
                 if ghost.is_frightened():
                     ghost.set_to_eaten()
                 elif ghost.is_chasing():
@@ -74,7 +75,7 @@ class GameEngine:
             if ghost.is_eaten():
                 ghost.runaway()
             else:
-                ghost.follow_target()
+                ghost.follow_target(self.screen)
 
 
     def __calc_power_up_counter(self):
@@ -121,62 +122,62 @@ class GameEngine:
             for j in range(len(self.board[i])):
                 if self.board[i][j] == BoardStructure.DOT.value:
                     center = (
-                        j * self.segment_width + (0.5 * self.segment_width),
-                        i * self.segment_height + (0.5 * self.segment_height))
+                        j * self.tile_width + (0.5 * self.tile_width),
+                        i * self.tile_height + (0.5 * self.tile_height))
                     pygame.draw.circle(self.screen, self.level.gate_color, center, 4)
                 if self.board[i][j] == BoardStructure.BIG_DOT.value and not self.flick:
                     center = (
-                        j * self.segment_width + (0.5 * self.segment_width),
-                        i * self.segment_height + (0.5 * self.segment_height))
+                        j * self.tile_width + (0.5 * self.tile_width),
+                        i * self.tile_height + (0.5 * self.tile_height))
                     pygame.draw.circle(self.screen, self.level.gate_color, center, 10)
                 if self.board[i][j] == BoardStructure.VERTICAL_WALL.value:
                     pygame.draw.line(self.screen, self.level.wall_color,
-                                     (j * self.segment_width + (0.5 * self.segment_width), i * self.segment_height),
-                                     (j * self.segment_width + (0.5 * self.segment_width),
-                                      i * self.segment_height + self.segment_height), 3)
+                                     (j * self.tile_width + (0.5 * self.tile_width), i * self.tile_height),
+                                     (j * self.tile_width + (0.5 * self.tile_width),
+                                      i * self.tile_height + self.tile_height), 3)
                 if self.board[i][j] == BoardStructure.HORIZONTAL_WALL.value:
                     pygame.draw.line(self.screen, self.level.wall_color,
-                                     (j * self.segment_width, i * self.segment_height + (0.5 * self.segment_height)),
-                                     (j * self.segment_width + self.segment_width,
-                                      i * self.segment_height + (0.5 * self.segment_height)), 3)
+                                     (j * self.tile_width, i * self.tile_height + (0.5 * self.tile_height)),
+                                     (j * self.tile_width + self.tile_width,
+                                      i * self.tile_height + (0.5 * self.tile_height)), 3)
                 if self.board[i][j] == BoardStructure.TOP_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
-                                    [(j * self.segment_width - (self.segment_width * 0.4)) - 2,
-                                     (i * self.segment_height + (0.5 * self.segment_height)), self.segment_width,
-                                     self.segment_height],
+                                    [(j * self.tile_width - (self.tile_width * 0.4)) - 2,
+                                     (i * self.tile_height + (0.5 * self.tile_height)), self.tile_width,
+                                     self.tile_height],
                                     0, PI / 2, 3)
                 if self.board[i][j] == BoardStructure.TOP_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
-                                    [(j * self.segment_width + (self.segment_width * 0.5)),
-                                     (i * self.segment_height + (0.5 * self.segment_height)),
-                                     self.segment_width, self.segment_height], PI / 2, PI,
+                                    [(j * self.tile_width + (self.tile_width * 0.5)),
+                                     (i * self.tile_height + (0.5 * self.tile_height)),
+                                     self.tile_width, self.tile_height], PI / 2, PI,
                                     3)
                 if self.board[i][j] == BoardStructure.BOTTOM_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
-                                    [(j * self.segment_width + (self.segment_width * 0.5)),
-                                     (i * self.segment_height - (0.4 * self.segment_height)),
-                                     self.segment_width, self.segment_height], PI,
+                                    [(j * self.tile_width + (self.tile_width * 0.5)),
+                                     (i * self.tile_height - (0.4 * self.tile_height)),
+                                     self.tile_width, self.tile_height], PI,
                                     3 * PI / 2, 3)
                 if self.board[i][j] == BoardStructure.BOTTOM_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
-                                    [(j * self.segment_width - (self.segment_width * 0.4)) - 2,
-                                     (i * self.segment_height - (0.4 * self.segment_height)), self.segment_width,
-                                     self.segment_height],
+                                    [(j * self.tile_width - (self.tile_width * 0.4)) - 2,
+                                     (i * self.tile_height - (0.4 * self.tile_height)), self.tile_width,
+                                     self.tile_height],
                                     3 * PI / 2,
                                     2 * PI, 3)
                 if self.board[i][j] == BoardStructure.GATE.value:
                     pygame.draw.line(self.screen, self.level.gate_color,
-                                     (j * self.segment_width, i * self.segment_height + (0.5 * self.segment_height)),
-                                     (j * self.segment_width + self.segment_width,
-                                      i * self.segment_height + (0.5 * self.segment_height)), 3)
+                                     (j * self.tile_width, i * self.tile_height + (0.5 * self.tile_height)),
+                                     (j * self.tile_width + self.tile_width,
+                                      i * self.tile_height + (0.5 * self.tile_height)), 3)
 
     def debug(self):
         # Draw additional grid to easily control object movements
         for i in range(self.board_definition.width):
             pygame.draw.line(self.screen, 'green',
-                             (i * self.segment_width, 0),
-                             (i * self.segment_width, self.board_definition.height * self.segment_height), 2)
+                             (i * self.tile_width, 0),
+                             (i * self.tile_width, self.board_definition.height * self.tile_height), 2)
         for j in range(self.board_definition.height):
             pygame.draw.line(self.screen, 'green',
-                             (0, j * self.segment_height),
-                             (self.board_definition.width * self.segment_width, j * self.segment_height), 2)
+                             (0, j * self.tile_height),
+                             (self.board_definition.width * self.tile_width, j * self.tile_height), 2)

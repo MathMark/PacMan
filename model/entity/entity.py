@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from settings import SPRITE_SIZE, DISTANCE_FACTOR
 from model.coordinates import Coordinates
 from model.direction import Direction
@@ -6,59 +8,67 @@ from model.turns import Turns
 
 
 class Entity:
-    def __init__(self, center_position: Coordinates, turns: Turns, space_params: SpaceParams, velocity=2):
+    def __init__(self, center_position: Tuple, turns: Turns, space_params: SpaceParams, velocity=2):
+        # entity location aligned by tile center
+        self.location_x = center_position[0]
+        self.location_y = center_position[1]
+
+        # entity top left point - to know where to draw entity sprite
+        self.top_left_x = self.location_x - SPRITE_SIZE // 2
+        self.top_left_y = self.location_y - SPRITE_SIZE // 2
+
         self.velocity = velocity
-        self.coordinates = center_position
-        self.center_x_pos = self.coordinates.x - SPRITE_SIZE // 2
-        self.center_y_pos = self.coordinates.y - SPRITE_SIZE // 2
         self.direction = Direction.LEFT
         self.turns = turns
         self.space_params = space_params
         self.board = space_params.board_definition.board
 
     def _move_right(self):
-        self.center_x_pos += self.velocity
-        self.coordinates.x += self.velocity
+        self.location_x += self.velocity
+        self.top_left_x += self.velocity
+
 
     def _move_left(self):
-        self.center_x_pos -= self.velocity
-        self.coordinates.x -= self.velocity
+        self.location_x -= self.velocity
+        self.top_left_x -= self.velocity
 
     def _move_up(self):
-        self.center_y_pos -= self.velocity
-        self.coordinates.y -= self.velocity
+        self.location_y -= self.velocity
+        self.top_left_y -= self.velocity
 
     def _move_down(self):
-        self.center_y_pos += self.velocity
-        self.coordinates.y += self.velocity
+        self.location_y += self.velocity
+        self.top_left_y += self.velocity
+
 
     def _check_borders_ahead(self):
         # Checks next cell based on current entity position and direction and
         # permits or prohibits to turn in certain direction depending on obstacles ahead
-
-        i = (self.coordinates.y // self.space_params.segment_height)
-        j = ((self.coordinates.x + DISTANCE_FACTOR) // self.space_params.segment_width) - 1
+        x = self.location_x
+        y = self.location_y
+        i = (y // self.space_params.tile_height)
+        j = ((x + DISTANCE_FACTOR) // self.space_params.tile_width) - 1
         if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
             self.turns.left = True
         else:
             self.turns.left = False
 
-        i = (self.coordinates.y // self.space_params.segment_height)
-        j = ((self.coordinates.x - DISTANCE_FACTOR) // self.space_params.segment_width) + 1
+        i = (y // self.space_params.tile_height)
+        j = ((x - DISTANCE_FACTOR) // self.space_params.tile_width) + 1
         if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
             self.turns.right = True
         else:
             self.turns.right = False
-        i = ((self.coordinates.y + DISTANCE_FACTOR) // self.space_params.segment_height) - 1
-        j = (self.coordinates.x // self.space_params.segment_width)
+        i = ((y + DISTANCE_FACTOR) // self.space_params.tile_height) - 1
+        j = (x // self.space_params.tile_width)
         if self.space_params.board_definition.check_coordinate_within(i, j) \
                 and (self.board[i][j] < 3 or self.board[i][j] == 9):
             self.turns.up = True
         else:
             self.turns.up = False
 
-        i = ((self.coordinates.y - DISTANCE_FACTOR) // self.space_params.segment_height) + 1
-        j = (self.coordinates.x // self.space_params.segment_width)
+        i = ((y - DISTANCE_FACTOR) // self.space_params.tile_height) + 1
+        j = (x // self.space_params.tile_width)
         if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
             self.turns.down = True
         else:
@@ -71,59 +81,60 @@ class Entity:
             if self.direction == Direction.RIGHT:
                 self.direction = direction_command
             else:
-                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
+                if self._is_at_center(self.space_params.tile_width, self.space_params.tile_height):
                     self.direction = direction_command
             return True
         elif direction_command == Direction.RIGHT and self.turns.right:
             if self.direction == Direction.LEFT:
                 self.direction = direction_command
             else:
-                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
+                if self._is_at_center(self.space_params.tile_width, self.space_params.tile_height):
                     self.direction = direction_command
             return True
         elif direction_command == Direction.UP and self.turns.up:
             if self.direction == Direction.DOWN:
                 self.direction = direction_command
             else:
-                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
+                if self._is_at_center(self.space_params.tile_width, self.space_params.tile_height):
                     self.direction = direction_command
             return True
         elif direction_command == Direction.DOWN and self.turns.down:
             if self.direction == Direction.UP:
                 self.direction = direction_command
             else:
-                if self._is_at_center(self.space_params.segment_width, self.space_params.segment_height):
+                if self._is_at_center(self.space_params.tile_width, self.space_params.tile_height):
                     self.direction = direction_command
             return True
         else:
             return False
 
     def _snap_to_center(self, cell_width, cell_height):
-        self.coordinates.x = round(self.coordinates.x // cell_width) * cell_width + cell_width // 2
-        self.coordinates.y = round(self.coordinates.y // cell_height) * cell_height + cell_height // 2
-        self.center_x_pos = self.coordinates.x - SPRITE_SIZE // 2
-        self.center_y_pos = self.coordinates.y - SPRITE_SIZE // 2
+        self.location_x = round(self.location_x // cell_width) * cell_width + cell_width // 2
+        self.location_y = round(self.location_y // cell_height) * cell_height + cell_height // 2
+        self.top_left_x = self.location_x - SPRITE_SIZE // 2
+        self.top_left_y = self.location_y - SPRITE_SIZE // 2
 
     def _is_at_center(self, cell_width, cell_height):
-        return (self.coordinates.x - cell_width // 2) % cell_width < 2 and \
-            (self.coordinates.y - cell_height // 2) % cell_height < 2
+        return (self.location_x - cell_width // 2) % cell_width < 2 and \
+            (self.location_y - cell_height // 2) % cell_height < 2
 
     def _teleport_if_board_limit_reached(self):
-        i = (self.center_y_pos // self.space_params.segment_height)
-        j = (self.center_x_pos // self.space_params.segment_width)
+        i = (self.top_left_y // self.space_params.tile_height)
+        j = (self.top_left_x // self.space_params.tile_width)
         if j >= self.space_params.board_definition.width - 1:
-            self.__teleport(self.space_params.segment_width, self.center_y_pos)
+            self.__teleport(self.space_params.tile_width, self.top_left_y)
         if j < 1:
-            self.__teleport((self.space_params.board_definition.width - 1) * self.space_params.segment_width,
-                            self.center_y_pos)
+            self.__teleport((self.space_params.board_definition.width - 1) * self.space_params.tile_width,
+                            self.top_left_y)
         if i >= self.space_params.board_definition.height - 1:
-            self.__teleport(self.center_x_pos, self.space_params.segment_height)
+            self.__teleport(self.top_left_x, self.space_params.tile_height)
         if i < 1:
-            self.__teleport(self.center_x_pos,
-                            (self.space_params.board_definition.height - 1) * self.space_params.segment_height)
+            self.__teleport(self.top_left_x,
+                            (self.space_params.board_definition.height - 1) * self.space_params.tile_height)
 
     def __teleport(self, x, y):
-        self.center_x_pos = x
-        self.center_y_pos = y
-        self.coordinates.x = self.center_x_pos + SPRITE_SIZE // 2
-        self.coordinates.y = self.center_y_pos + SPRITE_SIZE // 2
+        # TODO: fix it. we should pass coordinates aligned by tile center!
+        self.top_left_x = x
+        self.top_left_y = y
+        self.location_x = self.top_left_x + SPRITE_SIZE // 2
+        self.location_y = self.top_left_y + SPRITE_SIZE // 2

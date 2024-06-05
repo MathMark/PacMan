@@ -1,7 +1,8 @@
+from typing import Tuple
+
 import pygame
 
 from model.board_structure import BoardStructure
-from model.coordinates import Coordinates
 from model.direction import Direction
 from model.eaten_object import EatenObject
 from model.entity.entity import Entity
@@ -13,7 +14,7 @@ SPRITE_FREQUENCY = 7
 
 
 class Player(Entity):
-    def __init__(self, sprites: list, center_position: Coordinates, turns: Turns, space_params: SpaceParams, velocity=2,
+    def __init__(self, sprites: list, center_position: Tuple, turns: Turns, space_params: SpaceParams, velocity=2,
                  lives=3):
         super().__init__(center_position, turns, space_params, velocity)
         self.sprites = sprites
@@ -25,8 +26,8 @@ class Player(Entity):
         self.sprite_counter = 0
 
     def eat(self):
-        i = (self.coordinates.y // self.space_params.segment_height)
-        j = (self.coordinates.x // self.space_params.segment_width)
+        i = (self.location_y // self.space_params.tile_height)
+        j = (self.location_x // self.space_params.tile_width)
         if self.board[i][j] == BoardStructure.DOT.value:
             self.board[i][j] = 0
             return EatenObject.DOT
@@ -48,27 +49,27 @@ class Player(Entity):
             if self.turns.left:
                 self._move_left()
             else:
-                self._snap_to_center(self.space_params.segment_width, self.space_params.segment_height)
+                self._snap_to_center(self.space_params.tile_width, self.space_params.tile_height)
 
         if self.direction == Direction.RIGHT:
             self.__draw_face_right(screen)
             if self.turns.right:
                 self._move_right()
             else:
-                self._snap_to_center(self.space_params.segment_width, self.space_params.segment_height)
+                self._snap_to_center(self.space_params.tile_width, self.space_params.tile_height)
 
         if self.direction == Direction.DOWN:
             self.__draw_face_down(screen)
             if self.turns.down:
                 self._move_down()
             else:
-                self._snap_to_center(self.space_params.segment_width, self.space_params.segment_height)
+                self._snap_to_center(self.space_params.tile_width, self.space_params.tile_height)
         if self.direction == Direction.UP:
             self.__draw_face_up(screen)
             if self.turns.up:
                 self._move_up()
             else:
-                self._snap_to_center(self.space_params.segment_width, self.space_params.segment_height)
+                self._snap_to_center(self.space_params.tile_width, self.space_params.tile_height)
         return turned
 
     def __calculate_sprite_index(self):
@@ -80,16 +81,16 @@ class Player(Entity):
 
     def __draw_face_left(self, screen):
         screen.blit(pygame.transform.flip(self.sprites[self.sprite_index], True, False),
-                    (self.center_x_pos, self.center_y_pos))
+                    (self.top_left_x, self.top_left_y))
 
     def __draw_face_right(self, screen):
         screen.blit(self.sprites[self.sprite_index],
-                    (self.center_x_pos, self.center_y_pos))
+                    (self.top_left_x, self.top_left_y))
 
     def __draw_face_down(self, screen):
         screen.blit(pygame.transform.rotate(self.sprites[self.sprite_index], 270),
-                    (self.center_x_pos, self.center_y_pos))
+                    (self.top_left_x, self.top_left_y))
 
     def __draw_face_up(self, screen):
         screen.blit(pygame.transform.rotate(self.sprites[self.sprite_index], 90),
-                    (self.center_x_pos, self.center_y_pos))
+                    (self.top_left_x, self.top_left_y))

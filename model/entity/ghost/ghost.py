@@ -1,10 +1,13 @@
 import enum
 from queue import Queue
+from typing import Tuple
+
 import numpy as np
 import pygame
 from model.coordinates import Coordinates
 from model.direction import Direction
 from model.entity.entity import Entity
+from model.entity.player.player import Player
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
 from settings import SPRITE_SIZE
@@ -13,7 +16,7 @@ GHOST_SPRITE_SIZE = (45, 45)
 RUN_POSITION_CHANGE_FREQUENCY = 2
 
 class Ghost(Entity):
-    def __init__(self, center_position: Coordinates, img, frightened_img, eaten_img, target: Coordinates,
+    def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player,
                  turns: Turns, space_params: SpaceParams, home_corner: Coordinates,
                  velocity=2):
         super().__init__(center_position, turns, space_params, velocity)
@@ -21,8 +24,7 @@ class Ghost(Entity):
         self.eaten_img = eaten_img
         self.frightened_img = frightened_img
         self.direction = Direction.UP
-        self.target = target
-        self.current_target = self.target
+        self.player = player
         self.condition = self.Condition.CHASE
         self.home_corner = home_corner
         self.ghost_run_path = Queue()
@@ -56,16 +58,20 @@ class Ghost(Entity):
     def draw(self, screen):
         if self.condition == self.Condition.CHASE:
             screen.blit(pygame.transform.flip(self.img, True, False),
-                        (self.center_x_pos, self.center_y_pos))
+                        (self.top_left_x, self.top_left_y))
         elif self.condition == self.Condition.FRIGHTENED:
             screen.blit(pygame.transform.flip(self.frightened_img, True, False),
-                        (self.center_x_pos, self.center_y_pos))
+                        (self.top_left_x, self.top_left_y))
         else:  # eaten
             screen.blit(pygame.transform.flip(self.eaten_img, True, False),
-                        (self.center_x_pos, self.center_y_pos))
+                        (self.top_left_x, self.top_left_y))
 
-    def follow_target(self):
+    def follow_target(self, screen):
         pass
+
+    def target(self) -> Tuple:
+        pass
+
 
     def runaway(self):
         if self.ghost_run_path.empty():
@@ -76,8 +82,8 @@ class Ghost(Entity):
         else:
             if self.c % RUN_POSITION_CHANGE_FREQUENCY == 0:
                 next_node = self.ghost_run_path.get()
-                self.center_x_pos = next_node[0] * self.space_params.segment_width + (self.space_params.segment_width // 2)
-                self.center_y_pos = next_node[1] * self.space_params.segment_height + (self.space_params.segment_height // 2)
+                self.center_x_pos = next_node[0] * self.space_params.tile_width + (self.space_params.tile_width // 2)
+                self.center_y_pos = next_node[1] * self.space_params.tile_height + (self.space_params.tile_height // 2)
             if self.c == RUN_POSITION_CHANGE_FREQUENCY:
                 self.c = 0
             else:
@@ -87,8 +93,8 @@ class Ghost(Entity):
         # BFS algorithm to find the shortest path
         board = self.space_params.board_definition.board
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        x = (self.center_x_pos // self.space_params.segment_width)
-        y = (self.center_y_pos // self.space_params.segment_height)
+        x = (self.center_x_pos // self.space_params.tile_width)
+        y = (self.center_y_pos // self.space_params.tile_height)
         start = (x, y)
         end = (target_point.x, target_point.y)
         visited = np.zeros_like(board, dtype=bool)
@@ -117,24 +123,24 @@ class Ghost(Entity):
             if self.turns.left:
                 self._move_left()
             else:
-                self._snap_to_center(self.space_params.segment_width, self.space_params.segment_height)
+                self._snap_to_center(self.space_params.tile_width, self.space_params.tile_height)
 
         if self.direction == Direction.RIGHT:
             if self.turns.right:
                 self._move_right()
             else:
-                self._snap_to_center(self.space_params.segment_width, self.space_params.segment_height)
+                self._snap_to_center(self.space_params.tile_width, self.space_params.tile_height)
 
         if self.direction == Direction.DOWN:
             if self.turns.down:
                 self._move_down()
             else:
-                self._snap_to_center(self.space_params.segment_width, self.space_params.segment_height)
+                self._snap_to_center(self.space_params.tile_width, self.space_params.tile_height)
         if self.direction == Direction.UP:
             if self.turns.up:
                 self._move_up()
             else:
-                self._snap_to_center(self.space_params.segment_width, self.space_params.segment_height)
+                self._snap_to_center(self.space_params.tile_width, self.space_params.tile_height)
 
     class Condition(enum.Enum):
         CHASE = 0

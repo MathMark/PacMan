@@ -4,7 +4,7 @@ from model.entity.ghost.ghost import Ghost
 
 class Blinky(Ghost):
 
-    def follow_target(self):
+    def follow_target(self, screen):
         self._check_borders_ahead()
         if self.direction == Direction.RIGHT:
             if self.target.x > self.center_x_pos and self.turns.right:
@@ -78,4 +78,15 @@ class Blinky(Ghost):
                     self._move(Direction.LEFT)
             elif self.turns.down:
                 self._move(Direction.DOWN)
+
+    def target(self):
+        if self.player.direction == Direction.LEFT:
+            return self.player.top_left_x, self.player.top_left_y
+        elif self.player.direction == Direction.RIGHT:
+            return self.player.top_left_x + 4 * self.space_params.tile_width, self.player.top_left_y
+        elif self.player.direction == Direction.UP:
+            return self.player.top_left_x - 4 * self.space_params.tile_width, self.player.top_left_y - 4 * self.space_params.tile_height
+        elif self.player.direction == Direction.DOWN:
+            return self.player.top_left_x, self.player.top_left_y + 4 * self.space_params.tile_height
+
 
