@@ -40,7 +40,6 @@ class GameEngine:
         self.pause = False
 
     def tick(self):
-        self.debug()
         self.draw_level()
         self.draw_player()
         self.draw_ghosts()

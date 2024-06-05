@@ -9,8 +9,7 @@ class Pinky(Ghost):
     def follow_target(self, screen):
         # pinky is going to turn left or right whenever advantageous, but only up or down on collision
         target = self.target()
-        print(target)
-        pygame.draw.circle(screen, 'pink', target, 2)
+        pygame.draw.circle(screen, 'pink', target, 10)
         x = self.location_x
         y = self.location_y
         self._check_borders_ahead()
@@ -102,14 +101,13 @@ class Pinky(Ghost):
                     self._move(Direction.DOWN)
 
     def target(self):
-        return self.player.top_left_x, self.player.top_left_y
-        # if self.player.direction == Direction.LEFT:
-        #     return self.player.center_x_pos - 4 * self.space_params.tile_width, self.player.center_y_pos
-        # elif self.player.direction == Direction.RIGHT:
-        #     return self.player.center_x_pos + 4 * self.space_params.tile_width, self.player.center_y_pos
-        # elif self.player.direction == Direction.UP:
-        #     return self.player.center_x_pos - 4 * self.space_params.tile_width, self.player.center_y_pos - 4 * self.space_params.tile_height
-        # elif self.player.direction == Direction.DOWN:
-        #     return self.player.center_x_pos, self.player.center_y_pos + 4 * self.space_params.tile_height
-        #
-        #
+        if self.player.direction == Direction.LEFT:
+            return self.player.location_x - 4 * self.space_params.tile_width, self.player.location_y
+        elif self.player.direction == Direction.RIGHT:
+            return self.player.location_x + 4 * self.space_params.tile_width, self.player.location_y
+        elif self.player.direction == Direction.UP:
+            return self.player.location_x - 4 * self.space_params.tile_width, self.player.location_y - 4 * self.space_params.tile_height
+        elif self.player.direction == Direction.DOWN:
+            return self.player.location_x, self.player.location_y + 4 * self.space_params.tile_height
+
+

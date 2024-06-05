@@ -4,7 +4,6 @@ from typing import Tuple
 
 import numpy as np
 import pygame
-from model.coordinates import Coordinates
 from model.direction import Direction
 from model.entity.entity import Entity
 from model.entity.player.player import Player
@@ -15,9 +14,10 @@ from settings import SPRITE_SIZE
 GHOST_SPRITE_SIZE = (45, 45)
 RUN_POSITION_CHANGE_FREQUENCY = 2
 
+
 class Ghost(Entity):
     def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player,
-                 turns: Turns, space_params: SpaceParams, home_corner: Coordinates,
+                 turns: Turns, space_params: SpaceParams, home_corner: Tuple,
                  velocity=2):
         super().__init__(center_position, turns, space_params, velocity)
         self.img = img
@@ -51,7 +51,7 @@ class Ghost(Entity):
 
     def set_to_eaten(self):
         self.condition = self.Condition.EATEN
-        path = self.find_path(Coordinates(14, 14))
+        path = self.find_path((14, 14))
         for node in path:
             self.ghost_run_path.put(node)
 
@@ -72,31 +72,31 @@ class Ghost(Entity):
     def target(self) -> Tuple:
         pass
 
-
     def runaway(self):
         if self.ghost_run_path.empty():
             self.direction = Direction.UP
             self.turns = Turns()
             self.set_to_chase()
-            self.coordinates = Coordinates(self.center_x_pos + SPRITE_SIZE // 2, self.center_y_pos + SPRITE_SIZE // 2)
+            self.top_left_x = self.location_x - SPRITE_SIZE // 2
+            self.top_left_y = self.location_y - SPRITE_SIZE // 2
         else:
             if self.c % RUN_POSITION_CHANGE_FREQUENCY == 0:
                 next_node = self.ghost_run_path.get()
-                self.center_x_pos = next_node[0] * self.space_params.tile_width + (self.space_params.tile_width // 2)
-                self.center_y_pos = next_node[1] * self.space_params.tile_height + (self.space_params.tile_height // 2)
+                self.location_x = next_node[0] * self.space_params.tile_width + (self.space_params.tile_width // 2)
+                self.location_y = next_node[1] * self.space_params.tile_height + (self.space_params.tile_height // 2)
             if self.c == RUN_POSITION_CHANGE_FREQUENCY:
                 self.c = 0
             else:
                 self.c += 1
 
-    def find_path(self, target_point: Coordinates):
+    def find_path(self, target_point: Tuple):
         # BFS algorithm to find the shortest path
         board = self.space_params.board_definition.board
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        x = (self.center_x_pos // self.space_params.tile_width)
-        y = (self.center_y_pos // self.space_params.tile_height)
+        x = (self.location_x // self.space_params.tile_width)
+        y = (self.location_y // self.space_params.tile_height)
         start = (x, y)
-        end = (target_point.x, target_point.y)
+        end = (target_point[0], target_point[1])
         visited = np.zeros_like(board, dtype=bool)
         visited[start] = True
         queue = Queue()
