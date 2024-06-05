@@ -80,16 +80,16 @@ class Player(Entity):
 
     def __draw_face_left(self, screen):
         screen.blit(pygame.transform.flip(self.sprites[self.sprite_index], True, False),
-                    (self.x_pos, self.y_pos))
+                    (self.center_x_pos, self.center_y_pos))
 
     def __draw_face_right(self, screen):
         screen.blit(self.sprites[self.sprite_index],
-                    (self.x_pos, self.y_pos))
+                    (self.center_x_pos, self.center_y_pos))
 
     def __draw_face_down(self, screen):
         screen.blit(pygame.transform.rotate(self.sprites[self.sprite_index], 270),
-                    (self.x_pos, self.y_pos))
+                    (self.center_x_pos, self.center_y_pos))
 
     def __draw_face_up(self, screen):
         screen.blit(pygame.transform.rotate(self.sprites[self.sprite_index], 90),
-                    (self.x_pos, self.y_pos))
+                    (self.center_x_pos, self.center_y_pos))

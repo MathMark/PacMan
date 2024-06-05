@@ -2,10 +2,9 @@
 # 4 = horizontal line, 5 = top right, 6 = top left, 7 = bot left, 8 = bot right
 # 9 = gate
 
-from global_variables import FPS
+from settings import FPS
 from model.board_definition import BoardDefinition
 from model.level_config import LevelConfig
-from model.positions import InitialPositions
 
 board = [
 [6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5],
@@ -46,12 +45,6 @@ board = [
 board_definition = BoardDefinition(board)
 power_up_limit = 10 * FPS  # 10 seconds
 
-positions = InitialPositions(player_position=(15, 18),
-                             blinky_position=(12, 12),
-                             pinky_position=(13, 15),
-                             inky_position=(14, 15),
-                             clyde_position=(15, 15))
 
 level_1 = LevelConfig(wall_color='blue', gate_color='white',
-                      board_definition=board_definition, power_up_limit=power_up_limit,
-                      initial_positions=positions)
+                      board_definition=board_definition, power_up_limit=power_up_limit)

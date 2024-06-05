@@ -2,9 +2,10 @@ from model.direction import Direction
 from model.entity.ghost.ghost import Ghost
 
 
-class Blinky(Ghost):
+class Pinky(Ghost):
 
     def follow_target(self):
+        # pinky is going to turn left or right whenever advantageous, but only up or down on collision
         self._check_borders_ahead()
         if self.direction == Direction.RIGHT:
             if self.target.x > self.center_x_pos and self.turns.right:
@@ -25,7 +26,9 @@ class Blinky(Ghost):
             elif self.turns.right:
                 self._move(Direction.RIGHT)
         elif self.direction == Direction.LEFT:
-            if self.target.x < self.center_x_pos and self.turns.left:
+            if self.target.y > self.center_y_pos and self.turns.down:
+                self._move(Direction.DOWN)
+            elif self.target.x < self.center_x_pos and self.turns.left:
                 self._move(Direction.LEFT)
             elif not self.turns.left:
                 if self.target.y > self.center_y_pos and self.turns.down:
@@ -43,7 +46,9 @@ class Blinky(Ghost):
             elif self.turns.left:
                 self._move(Direction.LEFT)
         elif self.direction == Direction.UP:
-            if self.target.y < self.center_y_pos and self.turns.up:
+            if self.target.x < self.center_x_pos and self.turns.left:
+                self._move(Direction.LEFT)
+            elif self.target.y < self.center_y_pos and self.turns.up:
                 self._move(Direction.UP)
             elif not self.turns.up:
                 if self.target.x > self.center_x_pos and self.turns.right:
@@ -52,14 +57,19 @@ class Blinky(Ghost):
                     self._move(Direction.LEFT)
                 elif self.target.y > self.center_y_pos and self.turns.down:
                     self._move(Direction.DOWN)
+                elif self.turns.left:
+                    self._move(Direction.LEFT)
                 elif self.turns.down:
                     self._move(Direction.DOWN)
                 elif self.turns.right:
                     self._move(Direction.RIGHT)
-                elif self.turns.left:
-                    self._move(Direction.LEFT)
             elif self.turns.up:
-                self._move(Direction.UP)
+                if self.target.x > self.center_x_pos and self.turns.right:
+                    self._move(Direction.RIGHT)
+                elif self.target.x < self.center_x_pos and self.turns.left:
+                    self._move(Direction.LEFT)
+                else:
+                    self._move(Direction.UP)
         elif self.direction == Direction.DOWN:
             if self.target.y > self.center_y_pos and self.turns.down:
                 self._move(Direction.DOWN)
@@ -72,10 +82,14 @@ class Blinky(Ghost):
                     self._move(Direction.UP)
                 elif self.turns.up:
                     self._move(Direction.UP)
-                elif self.turns.right:
-                    self._move(Direction.RIGHT)
                 elif self.turns.left:
                     self._move(Direction.LEFT)
+                elif self.turns.right:
+                    self._move(Direction.RIGHT)
             elif self.turns.down:
-                self._move(Direction.DOWN)
-
+                if self.target.x > self.center_x_pos and self.turns.right:
+                    self._move(Direction.RIGHT)
+                elif self.target.x < self.center_x_pos and self.turns.left:
+                    self._move(Direction.LEFT)
+                else:
+                    self._move(Direction.DOWN)

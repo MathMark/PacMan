@@ -1,6 +1,5 @@
 import pygame
 from pygame import Surface
-
 from model.board_structure import BoardStructure
 from model.direction import Direction
 from model.eaten_object import EatenObject
@@ -38,7 +37,6 @@ class GameEngine:
         self.power_up_counter = 0
         self.score_coordinates = (SCORE_SCREEN_OFFSET, (self.screen.get_height() - SCORE_SCREEN_OFFSET))
         self.powerup_circle_coordinates = (250, ((self.screen.get_height() - SCORE_SCREEN_OFFSET) + 15))
-
         self.pause = False
 
     def tick(self):
@@ -73,7 +71,11 @@ class GameEngine:
     def draw_ghosts(self):
         for ghost in self.ghosts:
             ghost.draw(self.screen)
-            ghost.follow_target()
+            if ghost.is_eaten():
+                ghost.runaway()
+            else:
+                ghost.follow_target()
+
 
     def __calc_power_up_counter(self):
         if self.player.power_up:
@@ -93,7 +95,8 @@ class GameEngine:
 
     def __set_ghosts_to_chase(self):
         for ghost in self.ghosts:
-            ghost.set_to_chase(self.player.coordinates)
+            if not ghost.is_eaten():
+                ghost.set_to_chase()
 
     def __calculate_flick(self):
         self.flicker_counter += 1
@@ -167,8 +170,8 @@ class GameEngine:
                                      (j * self.segment_width + self.segment_width,
                                       i * self.segment_height + (0.5 * self.segment_height)), 3)
 
-    # Draw additional grid to easily control object movements
     def debug(self):
+        # Draw additional grid to easily control object movements
         for i in range(self.board_definition.width):
             pygame.draw.line(self.screen, 'green',
                              (i * self.segment_width, 0),
