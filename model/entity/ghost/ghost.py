@@ -1,16 +1,12 @@
 import enum
 import math
-from queue import Queue
 from typing import Tuple
-
-import numpy as np
 import pygame
 from model.direction import Direction
 from model.entity.entity import Entity
 from model.entity.player.player import Player
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
-from settings import SPRITE_SIZE
 
 GHOST_SPRITE_SIZE = (45, 45)
 RUN_POSITION_CHANGE_FREQUENCY = 2
@@ -51,7 +47,7 @@ class Ghost(Entity):
 
     def set_to_eaten(self):
         self.condition = self.Condition.EATEN
-        self.velocity = 6
+        self.velocity = 8
 
     def draw(self, screen):
         if self.condition == self.Condition.CHASE:
@@ -78,20 +74,16 @@ class Ghost(Entity):
         down = down_distance, Direction.DOWN, self.turns.down
 
         if self.direction == Direction.RIGHT:
-            extra_option = left if self.is_frightened() else (float('inf'), None, None)
-            next_turn = self.calc_next_turn([right, up, down, extra_option])
+            next_turn = self.calc_next_turn([right, up, down])
             self._move(next_turn)
         elif self.direction == Direction.LEFT:
-            extra_option = right if self.is_frightened() else (float('inf'), None, None)
-            next_turn = self.calc_next_turn([left, up, down, extra_option])
+            next_turn = self.calc_next_turn([left, up, down])
             self._move(next_turn)
         elif self.direction == Direction.UP:
-            extra_option = down if self.is_frightened() else (float('inf'), None, None)
-            next_turn = self.calc_next_turn([right, left, up, extra_option])
+            next_turn = self.calc_next_turn([right, left, up])
             self._move(next_turn)
         elif self.direction == Direction.DOWN:
-            extra_option = up if self.is_frightened() else (float('inf'), None, None)
-            next_turn = self.calc_next_turn([right, left, down, extra_option])
+            next_turn = self.calc_next_turn([right, left, down])
             self._move(next_turn)
 
     def calc_next_turn(self, possible_decisions):

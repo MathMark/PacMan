@@ -8,6 +8,7 @@ from model.level_config import LevelConfig
 import math
 
 from model.entity.player.player import Player
+from settings import DISTANCE_FACTOR
 
 PI = math.pi
 
@@ -30,9 +31,7 @@ class GameEngine:
         self.flick = True
         self.player = player
         self.ghosts = ghosts
-        self.distance_factor = 10
         self.direction_command = Direction.LEFT
-        pygame.font.init()
         self.game_font = pygame.font.SysFont('Comic Sans MS', 30)
         self.power_up_counter = 0
         self.score_coordinates = (SCORE_SCREEN_OFFSET, (self.screen.get_height() - SCORE_SCREEN_OFFSET))
@@ -48,8 +47,8 @@ class GameEngine:
 
     def check_ghosts_and_player_collision(self):
         for ghost in self.ghosts:
-            if (abs(ghost.location_x - self.player.location_x) < self.distance_factor) \
-                    and (abs(ghost.location_y - self.player.location_y) < self.distance_factor):
+            if (abs(ghost.location_x - self.player.location_x) < DISTANCE_FACTOR) \
+                    and (abs(ghost.location_y - self.player.location_y) < DISTANCE_FACTOR):
                 if ghost.is_frightened():
                     ghost.set_to_eaten()
                 elif ghost.is_chasing():

@@ -2,8 +2,9 @@ import sys
 
 import pygame
 
-from settings import RESOLUTION
-from levels.level_1 import *
+from model.board_definition import BoardDefinition
+from model.level_config import LevelConfig
+from settings import *
 from levels.level_content_initializer import LevelContentInitializer
 from model.direction import Direction
 
@@ -13,8 +14,11 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode(RESOLUTION)
         self.timer = pygame.time.Clock()
-        level1_init = LevelContentInitializer(level_1, self.screen)
-        self.game_engine = level1_init.init_game_engine()
+        board_definition = BoardDefinition(BOARD)
+        level_1 = LevelConfig(wall_color='blue', gate_color='white',
+                              board_definition=board_definition, power_up_limit=POWER_UP_LIMIT)
+        level_init = LevelContentInitializer(level_1, self.screen)
+        self.game_engine = level_init.init_game_engine()
 
     def update(self):
         self.timer.tick(FPS)
