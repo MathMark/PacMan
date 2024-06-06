@@ -8,6 +8,7 @@ from model.turns import Turns
 
 class Entity:
     def __init__(self, center_position: Tuple, turns: Turns, space_params: SpaceParams, velocity=2):
+        self.space_params = space_params
         # entity location aligned by tile center
         self.location_x = center_position[0]
         self.location_y = center_position[1]
@@ -19,7 +20,7 @@ class Entity:
         self.velocity = velocity
         self.direction = Direction.LEFT
         self.turns = turns
-        self.space_params = space_params
+
         self.board = space_params.board_definition.board
 
     def _move_right(self):

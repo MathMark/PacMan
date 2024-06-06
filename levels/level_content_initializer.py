@@ -55,7 +55,7 @@ class LevelContentInitializer:
 
         blinky = Blinky(center_position=blinky_location,
                         img=blinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                        player=player, turns=turns, space_params=space_params, home_corner=(5, 5))
+                        player=player, turns=turns, space_params=space_params, home_corner=(28, 9))
         pinky = Pinky(center_position=pinky_location,
                       img=pinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
                       player=player, turns=turns, space_params=space_params, home_corner=(5, 5))

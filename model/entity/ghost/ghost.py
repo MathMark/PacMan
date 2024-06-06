@@ -1,4 +1,5 @@
 import enum
+import math
 from queue import Queue
 from typing import Tuple
 
@@ -26,7 +27,8 @@ class Ghost(Entity):
         self.direction = Direction.UP
         self.player = player
         self.condition = self.Condition.CHASE
-        self.home_corner = home_corner
+        self.home_corner = home_corner[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
+                           home_corner[1] * self.space_params.tile_height + self.space_params.tile_height // 2
         self.ghost_run_path = Queue()
         self.c = 0
 
@@ -41,13 +43,11 @@ class Ghost(Entity):
 
     def set_to_chase(self):
         self.velocity = 2
-        self.current_target = self.target
         self.condition = self.Condition.CHASE
 
     def set_to_frightened(self):
-        self.velocity = 1
+        self.velocity = 10
         self.condition = self.Condition.FRIGHTENED
-        self.current_target = self.home_corner
 
     def set_to_eaten(self):
         self.condition = self.Condition.EATEN
@@ -60,14 +60,58 @@ class Ghost(Entity):
             screen.blit(pygame.transform.flip(self.img, True, False),
                         (self.top_left_x, self.top_left_y))
         elif self.condition == self.Condition.FRIGHTENED:
-            screen.blit(pygame.transform.flip(self.frightened_img, True, False),
+            # screen.blit(pygame.transform.flip(self.frightened_img, True, False),
+            #             (self.top_left_x, self.top_left_y))
+            screen.blit(pygame.transform.flip(self.img, True, False),
                         (self.top_left_x, self.top_left_y))
         else:  # eaten
             screen.blit(pygame.transform.flip(self.eaten_img, True, False),
                         (self.top_left_x, self.top_left_y))
 
     def follow_target(self, screen):
-        pass
+        self._check_borders_ahead()
+        target = self.target()
+        pygame.draw.circle(screen, 'red', target, 10)
+
+        right_distance = self.calc_distance(self.location_x + self.space_params.tile_width, self.location_y)
+        left_distance = self.calc_distance(self.location_x - self.space_params.tile_width, self.location_y)
+        up_distance = self.calc_distance(self.location_x, self.location_y - self.space_params.tile_height)
+        down_distance = self.calc_distance(self.location_x, self.location_y + self.space_params.tile_height)
+
+        right = right_distance, Direction.RIGHT, self.turns.right
+        left = left_distance, Direction.LEFT, self.turns.left
+        up = up_distance, Direction.UP, self.turns.up
+        down = down_distance, Direction.DOWN, self.turns.down
+
+        if self.direction == Direction.RIGHT:
+            next_turn = self.calc_next_turn([right, up, down])
+            self._move(next_turn)
+        elif self.direction == Direction.LEFT:
+            next_turn = self.calc_next_turn([left, up, down])
+            self._move(next_turn)
+        elif self.direction == Direction.UP:
+            next_turn = self.calc_next_turn([right, left, up])
+            self._move(next_turn)
+        elif self.direction == Direction.DOWN:
+            next_turn = self.calc_next_turn([right, left, down])
+            self._move(next_turn)
+
+    def calc_next_turn(self, possible_decisions):
+        prioritized = sorted(possible_decisions, key=lambda x: x[0], reverse=False)
+        if prioritized[0][0] == prioritized[1][0]:
+            print(prioritized)
+        for i in range(len(prioritized)):
+            if prioritized[i][2]:
+                return prioritized[i][1]
+
+    def calc_distance(self, x, y):
+        target = self.target()
+        target = self.__calc_tile_location(target[0], target[1])
+        self_location = self.__calc_tile_location(x, y)
+        return math.pow((target[0] - self_location[0]), 2) + math.pow((target[1] - self_location[1]), 2)
+
+    def __calc_tile_location(self, x, y):
+        return x // self.space_params.tile_width, y // self.space_params.tile_height
 
     def target(self) -> Tuple:
         pass
