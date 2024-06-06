@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 from model.direction import Direction
@@ -6,86 +8,50 @@ from model.entity.ghost.ghost import Ghost
 
 class Blinky(Ghost):
 
-
+    def calc_distance(self, x, y):
+        target = self.target()
+        target_x = target[0]
+        target_y = target[1]
+        return math.pow((target_x - x), 2) + math.pow((target_y - y), 2)
 
     def follow_target(self, screen):
         self._check_borders_ahead()
         target = self.target()
         pygame.draw.circle(screen, 'red', target, 10)
+
+        right_distance = self.calc_distance(self.location_x + self.space_params.tile_width, self.location_y)
+        left_distance = self.calc_distance(self.location_x - self.space_params.tile_width, self.location_y)
+        up_distance = self.calc_distance(self.location_x, self.location_y - self.space_params.tile_height)
+        down_distance = self.calc_distance(self.location_x, self.location_y + self.space_params.tile_height)
+
+        right = right_distance, Direction.RIGHT, self.turns.right
+        left = left_distance, Direction.LEFT, self.turns.left
+        up = up_distance, Direction.UP, self.turns.up
+        down = down_distance, Direction.DOWN, self.turns.down
+
         if self.direction == Direction.RIGHT:
-            if target[0] > self.location_x and self.turns.right:
-                self._move(Direction.RIGHT)
-            elif not self.turns.right:
-                if target[1] > self.location_y and self.turns.down:
-                    self._move(Direction.DOWN)
-                elif target[1] < self.location_y and self.turns.up:
-                    self._move(Direction.UP)
-                elif target[0] < self.location_x and self.turns.left:
-                    self._move(Direction.LEFT)
-                elif self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.turns.up:
-                    self._move(Direction.UP)
-                elif self.turns.left:
-                    self._move(Direction.LEFT)
-            elif self.turns.right:
-                self._move(Direction.RIGHT)
+            next_turn = self.calc_next_turn([right, up, down])
+            self._move(next_turn)
         elif self.direction == Direction.LEFT:
-            if target[0] < self.location_x and self.turns.left:
-                self._move(Direction.LEFT)
-            elif not self.turns.left:
-                if target[1] > self.location_y and self.turns.down:
-                    self._move(Direction.DOWN)
-                elif target[1] < self.location_y and self.turns.up:
-                    self._move(Direction.UP)
-                elif target[0] > self.location_x and self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.turns.up:
-                    self._move(Direction.UP)
-                elif self.turns.right:
-                    self._move(Direction.RIGHT)
-            elif self.turns.left:
-                self._move(Direction.LEFT)
+            next_turn = self.calc_next_turn([left, up, down])
+            self._move(next_turn)
         elif self.direction == Direction.UP:
-            if target[1] < self.location_y and self.turns.up:
-                self._move(Direction.UP)
-            elif not self.turns.up:
-                if target[0] > self.location_x and self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif target[0] < self.location_x and self.turns.left:
-                    self._move(Direction.LEFT)
-                elif target[1] > self.location_y and self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif self.turns.left:
-                    self._move(Direction.LEFT)
-            elif self.turns.up:
-                self._move(Direction.UP)
+            next_turn = self.calc_next_turn([right, left, up])
+            self._move(next_turn)
         elif self.direction == Direction.DOWN:
-            if target[1] > self.location_y and self.turns.down:
-                self._move(Direction.DOWN)
-            elif not self.turns.down:
-                if target[0] > self.location_x and self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif target[0] < self.location_x and self.turns.left:
-                    self._move(Direction.LEFT)
-                elif target[1] < self.location_y and self.turns.up:
-                    self._move(Direction.UP)
-                elif self.turns.up:
-                    self._move(Direction.UP)
-                elif self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif self.turns.left:
-                    self._move(Direction.LEFT)
-            elif self.turns.down:
-                self._move(Direction.DOWN)
+            next_turn = self.calc_next_turn([right, left, down])
+            self._move(next_turn)
 
     def target(self):
         return self.player.location_x, self.player.location_y
+
+    def calc_next_turn(self, possible_decisions):
+        prioritized = sorted(possible_decisions, key=lambda x: x[0], reverse=False)
+        for i in range(len(prioritized)):
+            if prioritized[i][2]:
+                return prioritized[i][1]
+
+
+
 
 
