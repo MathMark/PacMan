@@ -8,6 +8,7 @@ from model.eaten_object import EatenObject
 from model.entity.entity import Entity
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
+from settings import DISTANCE_FACTOR
 
 PLAYER_SPRITE_SIZE = 45
 SPRITE_FREQUENCY = 7
@@ -94,3 +95,37 @@ class Player(Entity):
     def __draw_face_up(self, screen):
         screen.blit(pygame.transform.rotate(self.sprites[self.sprite_index], 90),
                     (self.top_left_x, self.top_left_y))
+
+    def _check_borders_ahead(self):
+        # Checks next cell based on current entity position and direction and
+        # permits or prohibits to turn in certain direction depending on obstacles ahead
+        x = self.location_x
+        y = self.location_y
+        i = (y // self.space_params.tile_height)
+        j = ((x + DISTANCE_FACTOR) // self.space_params.tile_width) - 1
+        if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
+            self.turns.left = True
+        else:
+            self.turns.left = False
+
+        i = (y // self.space_params.tile_height)
+        j = ((x - DISTANCE_FACTOR) // self.space_params.tile_width) + 1
+        if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
+            self.turns.right = True
+        else:
+            self.turns.right = False
+        i = ((y + DISTANCE_FACTOR) // self.space_params.tile_height) - 1
+        j = (x // self.space_params.tile_width)
+        if self.space_params.board_definition.check_coordinate_within(i, j) \
+                and self.board[i][j] < 3:
+            self.turns.up = True
+        else:
+            self.turns.up = False
+
+        i = ((y - DISTANCE_FACTOR) // self.space_params.tile_height) + 1
+        j = (x // self.space_params.tile_width)
+        if self.space_params.board_definition.check_coordinate_within(i, j) \
+                and self.board[i][j] < 3:
+            self.turns.down = True
+        else:
+            self.turns.down = False

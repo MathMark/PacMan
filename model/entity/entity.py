@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from settings import SPRITE_SIZE, DISTANCE_FACTOR
+from settings import *
 from model.direction import Direction
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
@@ -42,38 +42,7 @@ class Entity:
 
 
     def _check_borders_ahead(self):
-        # Checks next cell based on current entity position and direction and
-        # permits or prohibits to turn in certain direction depending on obstacles ahead
-        x = self.location_x
-        y = self.location_y
-        i = (y // self.space_params.tile_height)
-        j = ((x + DISTANCE_FACTOR) // self.space_params.tile_width) - 1
-        if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
-            self.turns.left = True
-        else:
-            self.turns.left = False
-
-        i = (y // self.space_params.tile_height)
-        j = ((x - DISTANCE_FACTOR) // self.space_params.tile_width) + 1
-        if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
-            self.turns.right = True
-        else:
-            self.turns.right = False
-        i = ((y + DISTANCE_FACTOR) // self.space_params.tile_height) - 1
-        j = (x // self.space_params.tile_width)
-        if self.space_params.board_definition.check_coordinate_within(i, j) \
-                and (self.board[i][j] < 3 or self.board[i][j] == 9):
-            self.turns.up = True
-        else:
-            self.turns.up = False
-
-        i = ((y - DISTANCE_FACTOR) // self.space_params.tile_height) + 1
-        j = (x // self.space_params.tile_width)
-        if self.space_params.board_definition.check_coordinate_within(i, j) \
-                and (self.board[i][j] < 3 or self.board[i][j] == 9):
-            self.turns.down = True
-        else:
-            self.turns.down = False
+        pass
 
     def _align_movement_to_cell_center(self, direction_command):
         # Ensures entity moves strictly by cell centers and not blocked in corners.
