@@ -69,7 +69,8 @@ class Entity:
 
         i = ((y - DISTANCE_FACTOR) // self.space_params.tile_height) + 1
         j = (x // self.space_params.tile_width)
-        if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
+        if self.space_params.board_definition.check_coordinate_within(i, j) \
+                and (self.board[i][j] < 3 or self.board[i][j] == 9):
             self.turns.down = True
         else:
             self.turns.down = False

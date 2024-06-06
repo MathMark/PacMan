@@ -55,16 +55,20 @@ class LevelContentInitializer:
 
         blinky = Blinky(center_position=blinky_location,
                         img=blinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                        player=player, turns=turns, space_params=space_params, home_corner=(28, 9))
+                        player=player, turns=turns, space_params=space_params, home_corner=BLINKY_CORNER,
+                        ghost_house_location=GHOST_HOUSE_LOCATION)
         pinky = Pinky(center_position=pinky_location,
                       img=pinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                      player=player, turns=turns, space_params=space_params, home_corner=(5, 5))
+                      player=player, turns=turns, space_params=space_params, home_corner=PINKY_CORNER,
+                      ghost_house_location=GHOST_HOUSE_LOCATION)
         inky = Ghost(center_position=inky_location,
                      img=inky_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                     player=player, turns=turns, space_params=space_params, home_corner=(5, 5))
+                     player=player, turns=turns, space_params=space_params, home_corner=(5, 5),
+                     ghost_house_location=GHOST_HOUSE_LOCATION)
         clyde = Clyde(center_position=clyde_location,
                       img=clyde_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                      player=player, turns=turns, space_params=space_params, home_corner=(0, 0))
+                      player=player, turns=turns, space_params=space_params, home_corner=(0, 0),
+                      ghost_house_location=GHOST_HOUSE_LOCATION)
 
         return [blinky, pinky]
 

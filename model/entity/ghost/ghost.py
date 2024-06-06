@@ -18,7 +18,7 @@ RUN_POSITION_CHANGE_FREQUENCY = 2
 
 class Ghost(Entity):
     def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player,
-                 turns: Turns, space_params: SpaceParams, home_corner: Tuple,
+                 turns: Turns, space_params: SpaceParams, home_corner: Tuple, ghost_house_location : Tuple,
                  velocity=2):
         super().__init__(center_position, turns, space_params, velocity)
         self.img = img
@@ -29,8 +29,8 @@ class Ghost(Entity):
         self.condition = self.Condition.CHASE
         self.home_corner = home_corner[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
                            home_corner[1] * self.space_params.tile_height + self.space_params.tile_height // 2
-        self.ghost_run_path = Queue()
-        self.c = 0
+        self.ghost_house_location = ghost_house_location[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
+            ghost_house_location[1] * self.space_params.tile_height + self.space_params.tile_height // 2
 
     def is_frightened(self):
         return self.condition == self.Condition.FRIGHTENED
@@ -46,23 +46,19 @@ class Ghost(Entity):
         self.condition = self.Condition.CHASE
 
     def set_to_frightened(self):
-        self.velocity = 10
+        self.velocity = 1
         self.condition = self.Condition.FRIGHTENED
 
     def set_to_eaten(self):
         self.condition = self.Condition.EATEN
-        path = self.find_path((14, 14))
-        for node in path:
-            self.ghost_run_path.put(node)
+        self.velocity = 6
 
     def draw(self, screen):
         if self.condition == self.Condition.CHASE:
             screen.blit(pygame.transform.flip(self.img, True, False),
                         (self.top_left_x, self.top_left_y))
         elif self.condition == self.Condition.FRIGHTENED:
-            # screen.blit(pygame.transform.flip(self.frightened_img, True, False),
-            #             (self.top_left_x, self.top_left_y))
-            screen.blit(pygame.transform.flip(self.img, True, False),
+            screen.blit(pygame.transform.flip(self.frightened_img, True, False),
                         (self.top_left_x, self.top_left_y))
         else:  # eaten
             screen.blit(pygame.transform.flip(self.eaten_img, True, False),
@@ -70,8 +66,6 @@ class Ghost(Entity):
 
     def follow_target(self, screen):
         self._check_borders_ahead()
-        target = self.target()
-        pygame.draw.circle(screen, 'red', target, 10)
 
         right_distance = self.calc_distance(self.location_x + self.space_params.tile_width, self.location_y)
         left_distance = self.calc_distance(self.location_x - self.space_params.tile_width, self.location_y)
@@ -84,16 +78,20 @@ class Ghost(Entity):
         down = down_distance, Direction.DOWN, self.turns.down
 
         if self.direction == Direction.RIGHT:
-            next_turn = self.calc_next_turn([right, up, down])
+            extra_option = left if self.is_frightened() else (float('inf'), None, None)
+            next_turn = self.calc_next_turn([right, up, down, extra_option])
             self._move(next_turn)
         elif self.direction == Direction.LEFT:
-            next_turn = self.calc_next_turn([left, up, down])
+            extra_option = right if self.is_frightened() else (float('inf'), None, None)
+            next_turn = self.calc_next_turn([left, up, down, extra_option])
             self._move(next_turn)
         elif self.direction == Direction.UP:
-            next_turn = self.calc_next_turn([right, left, up])
+            extra_option = down if self.is_frightened() else (float('inf'), None, None)
+            next_turn = self.calc_next_turn([right, left, up, extra_option])
             self._move(next_turn)
         elif self.direction == Direction.DOWN:
-            next_turn = self.calc_next_turn([right, left, down])
+            extra_option = up if self.is_frightened() else (float('inf'), None, None)
+            next_turn = self.calc_next_turn([right, left, down, extra_option])
             self._move(next_turn)
 
     def calc_next_turn(self, possible_decisions):
@@ -115,49 +113,6 @@ class Ghost(Entity):
 
     def target(self) -> Tuple:
         pass
-
-    def runaway(self):
-        if self.ghost_run_path.empty():
-            self.direction = Direction.UP
-            self.turns = Turns()
-            self.set_to_chase()
-            self.top_left_x = self.location_x - SPRITE_SIZE // 2
-            self.top_left_y = self.location_y - SPRITE_SIZE // 2
-        else:
-            if self.c % RUN_POSITION_CHANGE_FREQUENCY == 0:
-                next_node = self.ghost_run_path.get()
-                self.location_x = next_node[0] * self.space_params.tile_width + (self.space_params.tile_width // 2)
-                self.location_y = next_node[1] * self.space_params.tile_height + (self.space_params.tile_height // 2)
-            if self.c == RUN_POSITION_CHANGE_FREQUENCY:
-                self.c = 0
-            else:
-                self.c += 1
-
-    def find_path(self, target_point: Tuple):
-        # BFS algorithm to find the shortest path
-        board = self.space_params.board_definition.board
-        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        x = (self.location_x // self.space_params.tile_width)
-        y = (self.location_y // self.space_params.tile_height)
-        start = (x, y)
-        end = (target_point[0], target_point[1])
-        visited = np.zeros_like(board, dtype=bool)
-        visited[start] = True
-        queue = Queue()
-        queue.put((start, []))
-        while not queue.empty():
-            (node, path) = queue.get()
-            for dx, dy in directions:
-                next_node = (node[0] + dx, node[1] + dy)
-                if (next_node == end):
-                    return path + [next_node]
-                if ((next_node[0] >= 0 and next_node[1] >= 0) and
-                        (next_node[1] < len(board) and next_node[0] < len(board[0])) and
-                        (board[next_node[1]][next_node[0]] < 3 or board[next_node[1]][next_node[0]] == 9)
-                        and not visited[next_node[1]][next_node[0]]):
-                    visited[next_node[1]][next_node[0]] = True
-                    queue.put((next_node, path + [next_node]))
-        return []
 
     def _move(self, direction_command: Direction):
         self._teleport_if_board_limit_reached()

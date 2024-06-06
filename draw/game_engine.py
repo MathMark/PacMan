@@ -71,10 +71,7 @@ class GameEngine:
     def draw_ghosts(self):
         for ghost in self.ghosts:
             ghost.draw(self.screen)
-            if ghost.is_eaten():
-                ghost.runaway()
-            else:
-                ghost.follow_target(self.screen)
+            ghost.follow_target(self.screen)
 
 
     def __calc_power_up_counter(self):
