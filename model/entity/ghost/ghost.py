@@ -15,7 +15,7 @@ RUN_POSITION_CHANGE_FREQUENCY = 2
 
 class Ghost(Entity):
     def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player,
-                 turns: Turns, space_params: SpaceParams, home_corner: Tuple, ghost_house_location : Tuple,
+                 turns: Turns, space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple,
                  velocity=2):
         super().__init__(center_position, turns, space_params, velocity)
         self.img = img

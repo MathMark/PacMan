@@ -5,6 +5,7 @@ from draw.game_engine import SCORE_SCREEN_OFFSET, GameEngine
 from model.entity.ghost.blinky import Blinky
 from model.entity.ghost.clyde import Clyde
 from model.entity.ghost.ghost import GHOST_SPRITE_SIZE, Ghost
+from model.entity.ghost.inky import Inky
 from model.entity.ghost.pinky import Pinky
 from model.level_config import LevelConfig
 from model.entity.player.player import PLAYER_SPRITE_SIZE, Player
@@ -61,16 +62,17 @@ class LevelContentInitializer:
                       img=pinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
                       player=player, turns=turns, space_params=space_params, home_corner=PINKY_CORNER,
                       ghost_house_location=GHOST_HOUSE_LOCATION)
-        inky = Ghost(center_position=inky_location,
+        inky = Inky(center_position=inky_location,
                      img=inky_img, frightened_img=frightened_img, eaten_img=eaten_img,
                      player=player, turns=turns, space_params=space_params, home_corner=(5, 5),
+                     blinky=blinky,
                      ghost_house_location=GHOST_HOUSE_LOCATION)
         clyde = Clyde(center_position=clyde_location,
                       img=clyde_img, frightened_img=frightened_img, eaten_img=eaten_img,
                       player=player, turns=turns, space_params=space_params, home_corner=(0, 0),
                       ghost_house_location=GHOST_HOUSE_LOCATION)
 
-        return [blinky, pinky]
+        return [blinky, pinky, inky]
 
     def init_game_engine(self):
         player = self.__load_player()
