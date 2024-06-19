@@ -7,7 +7,7 @@ from model.entity.entity import Entity
 from model.entity.player.player import Player
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
-from settings import DISTANCE_FACTOR
+from settings import DISTANCE_FACTOR, GHOST_HOUSE_COORDINATES_X, GHOST_HOUSE_COORDINATES_Y
 
 GHOST_SPRITE_SIZE = (45, 45)
 RUN_POSITION_CHANGE_FREQUENCY = 2
@@ -16,6 +16,7 @@ RUN_POSITION_CHANGE_FREQUENCY = 2
 class Ghost(Entity):
     def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player,
                  turns: Turns, space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple,
+                 ghost_house_exit: Tuple,
                  velocity=2):
         super().__init__(center_position, turns, space_params, velocity)
         self.img = img
@@ -28,6 +29,14 @@ class Ghost(Entity):
                            home_corner[1] * self.space_params.tile_height + self.space_params.tile_height // 2
         self.ghost_house_location = ghost_house_location[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
             ghost_house_location[1] * self.space_params.tile_height + self.space_params.tile_height // 2
+        self.ghost_house_exit = ghost_house_exit[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
+                           ghost_house_exit[1] * self.space_params.tile_height + self.space_params.tile_height // 2
+
+    def is_in_house(self):
+        x = self.location_x // self.space_params.tile_width
+        y = self.location_y // self.space_params.tile_height
+        return GHOST_HOUSE_COORDINATES_X[0] <= x <= GHOST_HOUSE_COORDINATES_X[1] \
+            and GHOST_HOUSE_COORDINATES_Y[0] <= y <= GHOST_HOUSE_COORDINATES_Y[1]
 
     def is_frightened(self):
         return self.condition == self.Condition.FRIGHTENED
@@ -63,6 +72,8 @@ class Ghost(Entity):
 
     def follow_target(self, screen):
         self._check_borders_ahead()
+        if self.is_eaten() and self.is_in_house():
+            self.set_to_chase()
 
         right_distance = self.calc_distance(self.location_x + self.space_params.tile_width, self.location_y)
         left_distance = self.calc_distance(self.location_x - self.space_params.tile_width, self.location_y)

@@ -14,9 +14,10 @@ class Inky(Ghost):
 
     def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player, turns: Turns,
                  space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple, blinky: Blinky,
+                 ghost_house_exit,
                  velocity=2):
         super().__init__(center_position, img, frightened_img, eaten_img, player, turns, space_params, home_corner,
-                         ghost_house_location, velocity)
+                         ghost_house_location, ghost_house_exit, velocity)
         self.blinky = blinky
 
     def follow_target(self, screen):
@@ -24,15 +25,18 @@ class Inky(Ghost):
         super().follow_target(screen)
 
     def target(self):
-        if self.is_chasing():
-            middle_point = self.__calculate_middle_target_point()
-            delta_x = self.blinky.location_x - middle_point[0]
-            delta_y = self.blinky.location_y - middle_point[1]
-            return self.blinky.location_x - (-1 * delta_x), self.blinky.location_y - (-1 * delta_y)
-        elif self.is_frightened():
-            return self.home_corner
-        elif self.is_eaten():
-            return self.ghost_house_location
+        if self.is_in_house():
+            return self.ghost_house_exit
+        else:
+            if self.is_chasing():
+                middle_point = self.__calculate_middle_target_point()
+                delta_x = self.blinky.location_x - middle_point[0]
+                delta_y = self.blinky.location_y - middle_point[1]
+                return self.blinky.location_x - (-1 * delta_x), self.blinky.location_y - (-1 * delta_y)
+            elif self.is_frightened():
+                return self.home_corner
+            elif self.is_eaten():
+                return self.ghost_house_location
 
     def __calculate_middle_target_point(self):
         if self.player.direction == Direction.LEFT:
