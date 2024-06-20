@@ -24,13 +24,15 @@ class Ghost(Entity):
         self.frightened_img = frightened_img
         self.direction = Direction.UP
         self.player = player
-        self.condition = self.Condition.CHASE
+        self.condition = self.State.CHASE
         self.home_corner = home_corner[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
                            home_corner[1] * self.space_params.tile_height + self.space_params.tile_height // 2
-        self.ghost_house_location = ghost_house_location[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
-            ghost_house_location[1] * self.space_params.tile_height + self.space_params.tile_height // 2
+        self.ghost_house_location = ghost_house_location[
+                                        0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
+                                    ghost_house_location[
+                                        1] * self.space_params.tile_height + self.space_params.tile_height // 2
         self.ghost_house_exit = ghost_house_exit[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
-                           ghost_house_exit[1] * self.space_params.tile_height + self.space_params.tile_height // 2
+                                ghost_house_exit[1] * self.space_params.tile_height + self.space_params.tile_height // 2
 
     def is_in_house(self):
         x = self.location_x // self.space_params.tile_width
@@ -39,31 +41,31 @@ class Ghost(Entity):
             and GHOST_HOUSE_COORDINATES_Y[0] <= y <= GHOST_HOUSE_COORDINATES_Y[1]
 
     def is_frightened(self):
-        return self.condition == self.Condition.FRIGHTENED
+        return self.condition == self.State.FRIGHTENED
 
     def is_eaten(self):
-        return self.condition == self.Condition.EATEN
+        return self.condition == self.State.EATEN
 
     def is_chasing(self):
-        return self.condition == self.Condition.CHASE
+        return self.condition == self.State.CHASE
 
     def set_to_chase(self):
         self.velocity = 2
-        self.condition = self.Condition.CHASE
+        self.condition = self.State.CHASE
 
     def set_to_frightened(self):
         self.velocity = 1
-        self.condition = self.Condition.FRIGHTENED
+        self.condition = self.State.FRIGHTENED
 
     def set_to_eaten(self):
-        self.condition = self.Condition.EATEN
+        self.condition = self.State.EATEN
         self.velocity = 8
 
     def draw(self, screen):
-        if self.condition == self.Condition.CHASE:
+        if self.condition == self.State.CHASE:
             screen.blit(pygame.transform.flip(self.img, True, False),
                         (self.top_left_x, self.top_left_y))
-        elif self.condition == self.Condition.FRIGHTENED:
+        elif self.condition == self.State.FRIGHTENED:
             screen.blit(pygame.transform.flip(self.frightened_img, True, False),
                         (self.top_left_x, self.top_left_y))
         else:  # eaten
@@ -106,11 +108,11 @@ class Ghost(Entity):
 
     def calc_distance(self, x, y):
         target = self.target()
-        target = self.__calc_tile_location(target[0], target[1])
-        self_location = self.__calc_tile_location(x, y)
+        target = self._calc_tile_location(target[0], target[1])
+        self_location = self._calc_tile_location(x, y)
         return math.pow((target[0] - self_location[0]), 2) + math.pow((target[1] - self_location[1]), 2)
 
-    def __calc_tile_location(self, x, y):
+    def _calc_tile_location(self, x, y):
         return x // self.space_params.tile_width, y // self.space_params.tile_height
 
     def target(self) -> Tuple:
@@ -163,7 +165,7 @@ class Ghost(Entity):
             self.turns.right = False
         i = ((y + DISTANCE_FACTOR) // self.space_params.tile_height) - 1
         j = (x // self.space_params.tile_width)
-        if self._is_asle_ahead(i, j)  or self.board[i][j] == 9:
+        if self._is_asle_ahead(i, j) or self.board[i][j] == 9:
             self.turns.up = True
         else:
             self.turns.up = False
@@ -175,7 +177,12 @@ class Ghost(Entity):
         else:
             self.turns.down = False
 
-    class Condition(enum.Enum):
+    class State(enum.Enum):
+        # when a ghost is chasing pacman
         CHASE = 0
+        # when a ghost is eaten by pacman
         EATEN = 1
+        # when pacman ate a power pellet
         FRIGHTENED = 2
+        # during this mode, a ghost does not attack pacman
+        SCATTER = 3

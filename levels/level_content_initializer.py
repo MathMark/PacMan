@@ -72,7 +72,7 @@ class LevelContentInitializer:
                       player=player, turns=turns, space_params=space_params, home_corner=(0, 0),
                       ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
 
-        return [pinky, inky]
+        return [blinky, pinky, inky, clyde]
 
     def init_game_engine(self):
         player = self.__load_player()

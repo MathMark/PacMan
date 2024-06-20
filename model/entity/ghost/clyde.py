@@ -1,3 +1,5 @@
+import math
+
 import pygame.draw
 
 from model.direction import Direction
@@ -7,102 +9,28 @@ from model.entity.ghost.ghost import Ghost
 class Clyde(Ghost):
 
     def follow_target(self, screen):
+        pygame.draw.circle(screen, 'yellow', self.target(), 10)
+        super().follow_target(screen)
 
-        self._check_borders_ahead()
-        if self.direction == Direction.RIGHT:
-            if self.target_x() > self.center_x_pos and self.turns.right:
-                self._move(Direction.RIGHT)
-            elif not self.turns.right:
-                if self.target_y() > self.center_y_pos and self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.target_y() < self.center_y_pos and self.turns.up:
-                    self._move(Direction.UP)
-                elif self.target_x() < self.center_x_pos and self.turns.left:
-                    self._move(Direction.LEFT)
-                elif self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.turns.up:
-                    self._move(Direction.UP)
-                elif self.turns.left:
-                    self._move(Direction.LEFT)
-            elif self.turns.right:
-                if self.target_y() > self.center_y_pos and self.turns.down:
-                    self._move(Direction.DOWN)
-                if self.target_y() < self.center_y_pos and self.turns.up:
-                    self._move(Direction.UP)
+    def target(self):
+        if self.is_in_house():
+            return self.ghost_house_exit
+        else:
+            if self.is_chasing():
+                player_x, player_y = self._calc_tile_location(self.player.location_x, self.player.location_y)
+                mine_x, mine_y = self._calc_tile_location(self.location_x, self.location_y)
+                distance = math.sqrt(math.pow((player_x - mine_x), 2) + math.pow((player_y - mine_y), 2))
+                if distance <= 8:
+                    return self.player.location_x, self.player.location_y
                 else:
-                    self._move(Direction.RIGHT)
-        elif self.direction == Direction.LEFT:
-            if self.target_y() > self.center_y_pos and self.turns.down:
-                self._move(Direction.DOWN)
-            elif self.target_x() < self.center_x_pos and self.turns.left:
-                self._move(Direction.LEFT)
-            elif not self.turns.left:
-                if self.target_y() > self.center_y_pos and self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.target_y() < self.center_y_pos and self.turns.up:
-                    self._move(Direction.UP)
-                elif self.target_x() > self.center_x_pos and self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.turns.up:
-                    self._move(Direction.UP)
-                elif self.turns.right:
-                    self._move(Direction.RIGHT)
-            elif self.turns.left:
-                if self.target_y() > self.center_y_pos and self.turns.down:
-                    self._move(Direction.DOWN)
-                if self.target_y() < self.center_y_pos and self.turns.up:
-                    self._move(Direction.UP)
-                else:
-                    self._move(Direction.LEFT)
-        elif self.direction == Direction.UP:
-            if self.target_x() < self.center_x_pos and self.turns.left:
-                self._move(Direction.LEFT)
-            elif self.target_y() < self.center_y_pos and self.turns.up:
-                self.direction = Direction.UP
-                self._move(Direction.UP)
-            elif not self.turns.up:
-                if self.target_x() > self.center_x_pos and self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif self.target_x() < self.center_x_pos and self.turns.left:
-                    self._move(Direction.LEFT)
-                elif self.target_y() > self.center_y_pos and self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.turns.left:
-                    self._move(Direction.LEFT)
-                elif self.turns.down:
-                    self._move(Direction.DOWN)
-                elif self.turns.right:
-                    self._move(Direction.RIGHT)
-            elif self.turns.up:
-                if self.target_x() > self.center_x_pos and self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif self.target_x() < self.center_x_pos and self.turns.left:
-                    self._move(Direction.LEFT)
-                else:
-                    self._move(Direction.UP)
-        elif self.direction == Direction.DOWN:
-            if self.target_y() > self.center_y_pos and self.turns.down:
-                self._move(Direction.DOWN)
-            elif not self.turns.down:
-                if self.target_x() > self.center_x_pos and self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif self.target_x() < self.center_x_pos and self.turns.left:
-                    self._move(Direction.LEFT)
-                elif self.target_y() < self.center_y_pos and self.turns.up:
-                    self._move(Direction.UP)
-                elif self.turns.up:
-                    self._move(Direction.UP)
-                elif self.turns.left:
-                    self._move(Direction.LEFT)
-                elif self.turns.right:
-                    self._move(Direction.RIGHT)
-            elif self.turns.down:
-                if self.target_x() > self.center_x_pos and self.turns.right:
-                    self._move(Direction.RIGHT)
-                elif self.target_x() < self.center_x_pos and self.turns.left:
-                    self._move(Direction.LEFT)
-                else:
-                    self._move(Direction.RIGHT)
+                    return 10, 10
+            elif self.is_frightened():
+                return self.home_corner
+            elif self.is_eaten():
+                return self.ghost_house_location
+
+
+
+
+
+
