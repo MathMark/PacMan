@@ -1,13 +1,8 @@
 import math
-import pygame.draw
 from model.entity.ghost.ghost import Ghost
 
 
 class Clyde(Ghost):
-
-    def follow_target(self, screen):
-        pygame.draw.circle(screen, 'yellow', self.target(), 10)
-        super().follow_target(screen)
 
     def target(self):
         if self.is_in_house():

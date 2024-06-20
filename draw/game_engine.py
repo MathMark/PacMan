@@ -3,12 +3,16 @@ from pygame import Surface
 from model.board_structure import BoardStructure
 from model.direction import Direction
 from model.eaten_object import EatenObject
+from model.entity.ghost.blinky import Blinky
+from model.entity.ghost.clyde import Clyde
 from model.entity.ghost.ghost import Ghost
+from model.entity.ghost.inky import Inky
+from model.entity.ghost.pinky import Pinky
 from model.level_config import LevelConfig
 import math
 
 from model.entity.player.player import Player
-from settings import DISTANCE_FACTOR, FPS
+from settings import DISTANCE_FACTOR, FPS, DEBUG
 
 PI = math.pi
 
@@ -49,6 +53,8 @@ class GameEngine:
         self.draw_misc()
         self.check_ghosts_and_player_collision()
         self.switch_to_scatter_mode()
+        if DEBUG:
+            self.debug()
 
     def switch_to_scatter_mode(self):
         if self.enable_scatter_counter == SCATTER_ENABLE_TRIGGER:
@@ -82,8 +88,7 @@ class GameEngine:
     def draw_ghosts(self):
         for ghost in self.ghosts:
             ghost.draw(self.screen)
-            ghost.follow_target(self.screen)
-
+            ghost.follow_target()
 
     def __calc_power_up_counter(self):
         if self.player.power_up:
@@ -183,12 +188,30 @@ class GameEngine:
                                       i * self.tile_height + (0.5 * self.tile_height)), 3)
 
     def debug(self):
+        self.debug_grid()
+        self.debug_ghost_targets()
+
+    def debug_ghost_targets(self):
+        for ghost in self.ghosts:
+            if isinstance(ghost, Blinky):
+                pygame.draw.circle(self.screen, 'red', ghost.target(), 8)
+            elif isinstance(ghost, Pinky):
+                pygame.draw.circle(self.screen, 'pink', ghost.target(), 8)
+            elif isinstance(ghost, Inky):
+                pygame.draw.circle(self.screen, 'blue', ghost.target(), 8)
+            elif isinstance(ghost, Clyde):
+                pygame.draw.circle(self.screen, 'yellow', ghost.target(), 8)
+
+    def debug_grid(self):
         # Draw additional grid to easily control object movements
         for i in range(self.board_definition.width):
             pygame.draw.line(self.screen, 'green',
                              (i * self.tile_width, 0),
-                             (i * self.tile_width, self.board_definition.height * self.tile_height), 2)
+                             (i * self.tile_width, self.board_definition.height * self.tile_height), 1)
         for j in range(self.board_definition.height):
             pygame.draw.line(self.screen, 'green',
                              (0, j * self.tile_height),
-                             (self.board_definition.width * self.tile_width, j * self.tile_height), 2)
+                             (self.board_definition.width * self.tile_width, j * self.tile_height), 1)
+
+
+

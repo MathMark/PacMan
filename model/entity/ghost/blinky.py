@@ -1,12 +1,7 @@
-import pygame
 from model.entity.ghost.ghost import Ghost
 
 
 class Blinky(Ghost):
-
-    def follow_target(self, screen):
-        pygame.draw.circle(screen, 'red', self.target(), 10)
-        super().follow_target(screen)
 
     def target(self):
         if self.is_in_house():

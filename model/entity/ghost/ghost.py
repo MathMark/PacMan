@@ -85,7 +85,7 @@ class Ghost(Entity):
             screen.blit(pygame.transform.flip(self.eaten_img, True, False),
                         (self.top_left_x, self.top_left_y))
 
-    def follow_target(self, screen):
+    def follow_target(self):
         self._check_borders_ahead()
         if self.is_eaten() and self.is_in_house():
             self.set_to_chase()

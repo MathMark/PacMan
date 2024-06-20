@@ -1,7 +1,5 @@
 from typing import Tuple
 
-import pygame
-
 from model.direction import Direction
 from model.entity.ghost.blinky import Blinky
 from model.entity.ghost.ghost import Ghost
@@ -19,10 +17,6 @@ class Inky(Ghost):
         super().__init__(center_position, img, frightened_img, eaten_img, player, turns, space_params, home_corner,
                          ghost_house_location, ghost_house_exit, velocity)
         self.blinky = blinky
-
-    def follow_target(self, screen):
-        pygame.draw.circle(screen, 'blue', self.target(), 10)
-        super().follow_target(screen)
 
     def target(self):
         if self.is_in_house():

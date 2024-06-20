@@ -1,14 +1,8 @@
-import pygame
-
 from model.direction import Direction
 from model.entity.ghost.ghost import Ghost
 
 
 class Pinky(Ghost):
-
-    def follow_target(self, screen):
-        pygame.draw.circle(screen, 'pink', self.target(), 10)
-        super().follow_target(screen)
 
     def target(self):
         if self.is_in_house():
