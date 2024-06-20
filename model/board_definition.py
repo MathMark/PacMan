@@ -11,3 +11,4 @@ class BoardDefinition:
 
     def check_coordinate_within(self, i, j):
         return i <= self.height - 1 and j <= self.width - 1
+

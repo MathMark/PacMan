@@ -100,8 +100,6 @@ class Ghost(Entity):
 
     def calc_next_turn(self, possible_decisions):
         prioritized = sorted(possible_decisions, key=lambda x: x[0], reverse=False)
-        if prioritized[0][0] == prioritized[1][0]:
-            print(prioritized)
         for i in range(len(prioritized)):
             if prioritized[i][2]:
                 return prioritized[i][1]
@@ -152,29 +150,27 @@ class Ghost(Entity):
         y = self.location_y
         i = (y // self.space_params.tile_height)
         j = ((x + DISTANCE_FACTOR) // self.space_params.tile_width) - 1
-        if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
+        if self._is_asle_ahead(i, j):
             self.turns.left = True
         else:
             self.turns.left = False
 
         i = (y // self.space_params.tile_height)
         j = ((x - DISTANCE_FACTOR) // self.space_params.tile_width) + 1
-        if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
+        if self._is_asle_ahead(i, j):
             self.turns.right = True
         else:
             self.turns.right = False
         i = ((y + DISTANCE_FACTOR) // self.space_params.tile_height) - 1
         j = (x // self.space_params.tile_width)
-        if self.space_params.board_definition.check_coordinate_within(i, j) \
-                and (self.board[i][j] < 3 or self.board[i][j] == 9):
+        if self._is_asle_ahead(i, j)  or self.board[i][j] == 9:
             self.turns.up = True
         else:
             self.turns.up = False
 
         i = ((y - DISTANCE_FACTOR) // self.space_params.tile_height) + 1
         j = (x // self.space_params.tile_width)
-        if self.space_params.board_definition.check_coordinate_within(i, j) \
-                and (self.board[i][j] < 3 or (self.is_eaten() and self.board[i][j] == 9)):
+        if self._is_asle_ahead(i, j) or (self.is_eaten() and self.board[i][j] == 9):
             self.turns.down = True
         else:
             self.turns.down = False

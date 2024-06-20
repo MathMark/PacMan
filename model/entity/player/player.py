@@ -39,9 +39,9 @@ class Player(Entity):
         return EatenObject.NOTHING
 
     def move(self, screen, direction_command: Direction):
+        self._teleport_if_board_limit_reached()
         self._check_borders_ahead()
         self.__calculate_sprite_index()
-        self._teleport_if_board_limit_reached()
 
         turned = self._align_movement_to_cell_center(direction_command)
 
@@ -103,29 +103,28 @@ class Player(Entity):
         y = self.location_y
         i = (y // self.space_params.tile_height)
         j = ((x + DISTANCE_FACTOR) // self.space_params.tile_width) - 1
-        if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
+
+        if self._is_asle_ahead(i, j):
             self.turns.left = True
         else:
             self.turns.left = False
 
         i = (y // self.space_params.tile_height)
         j = ((x - DISTANCE_FACTOR) // self.space_params.tile_width) + 1
-        if self.space_params.board_definition.check_coordinate_within(i, j) and self.board[i][j] < 3:
+        if self._is_asle_ahead(i, j):
             self.turns.right = True
         else:
             self.turns.right = False
         i = ((y + DISTANCE_FACTOR) // self.space_params.tile_height) - 1
         j = (x // self.space_params.tile_width)
-        if self.space_params.board_definition.check_coordinate_within(i, j) \
-                and self.board[i][j] < 3:
+        if self._is_asle_ahead(i, j):
             self.turns.up = True
         else:
             self.turns.up = False
 
         i = ((y - DISTANCE_FACTOR) // self.space_params.tile_height) + 1
         j = (x // self.space_params.tile_width)
-        if self.space_params.board_definition.check_coordinate_within(i, j) \
-                and self.board[i][j] < 3:
+        if self._is_asle_ahead(i, j):
             self.turns.down = True
         else:
             self.turns.down = False

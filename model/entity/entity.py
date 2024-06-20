@@ -89,18 +89,28 @@ class Entity:
             (self.location_y - cell_height // 2) % cell_height < 2
 
     def _teleport_if_board_limit_reached(self):
-        i = (self.top_left_y // self.space_params.tile_height)
-        j = (self.top_left_x // self.space_params.tile_width)
-        if j >= self.space_params.board_definition.width - 1:
+        left_i = (self.top_left_y // self.space_params.tile_height)
+        left_j = (self.top_left_x // self.space_params.tile_width)
+
+        right_i = ((self.top_left_y + SPRITE_SIZE) // self.space_params.tile_height)
+        right_j = ((self.top_left_x + SPRITE_SIZE) // self.space_params.tile_width)
+
+        if left_j >= self.space_params.board_definition.width - 1:
             self.__teleport(self.space_params.tile_width, self.top_left_y)
-        if j < 1:
+        if right_j < 1:
             self.__teleport((self.space_params.board_definition.width - 1) * self.space_params.tile_width,
                             self.top_left_y)
-        if i >= self.space_params.board_definition.height - 1:
+        if left_i >= self.space_params.board_definition.height - 1:
             self.__teleport(self.top_left_x, self.space_params.tile_height)
-        if i < 1:
+        if right_i < 1:
             self.__teleport(self.top_left_x,
                             (self.space_params.board_definition.height - 1) * self.space_params.tile_height)
+
+    def _is_asle_ahead(self, i, j):
+        if i > self.space_params.board_definition.height - 1 or j > self.space_params.board_definition.width - 1:
+            return True
+        else:
+            return self.board[i][j] < 3
 
     def __teleport(self, x, y):
         # TODO: fix it. we should pass coordinates aligned by tile center!
