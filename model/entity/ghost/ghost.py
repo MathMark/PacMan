@@ -91,11 +91,9 @@ class Ghost(Entity):
             self.set_to_chase()
 
         self.scatter_counter_duration += 1
-        print(self.scatter_counter_duration)
-        if self.scatter_counter_duration == SCATTER_DISABLE_TRIGGER:
+        if self.is_scatter() and self.scatter_counter_duration == SCATTER_DISABLE_TRIGGER:
             self.set_to_chase()
             self.scatter_counter_duration = 0
-
 
         right_distance = self.calc_distance(self.location_x + self.space_params.tile_width, self.location_y)
         left_distance = self.calc_distance(self.location_x - self.space_params.tile_width, self.location_y)
