@@ -4,7 +4,7 @@ from pygame import Surface
 from draw.game_engine import SCORE_SCREEN_OFFSET, GameEngine
 from model.entity.ghost.blinky import Blinky
 from model.entity.ghost.clyde import Clyde
-from model.entity.ghost.ghost import GHOST_SPRITE_SIZE, Ghost
+from model.entity.ghost.ghost import GHOST_SPRITE_SIZE
 from model.entity.ghost.inky import Inky
 from model.entity.ghost.pinky import Pinky
 from model.level_config import LevelConfig

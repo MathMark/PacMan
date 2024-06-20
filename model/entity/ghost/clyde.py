@@ -1,8 +1,5 @@
 import math
-
 import pygame.draw
-
-from model.direction import Direction
 from model.entity.ghost.ghost import Ghost
 
 

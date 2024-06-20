@@ -1,7 +1,5 @@
 import pygame
-
 from model.entity.ghost.ghost import Ghost
-from settings import GHOST_HOUSE_EXIT
 
 
 class Blinky(Ghost):
