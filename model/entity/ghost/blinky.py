@@ -20,6 +20,8 @@ class Blinky(Ghost):
                 return self.home_corner
             elif self.is_eaten():
                 return self.ghost_house_location
+            elif self.is_scatter():
+                return self.home_corner
 
 
 

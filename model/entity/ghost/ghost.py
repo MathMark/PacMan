@@ -7,13 +7,17 @@ from model.entity.entity import Entity
 from model.entity.player.player import Player
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
-from settings import DISTANCE_FACTOR, GHOST_HOUSE_COORDINATES_X, GHOST_HOUSE_COORDINATES_Y
+from settings import DISTANCE_FACTOR, GHOST_HOUSE_COORDINATES_X, GHOST_HOUSE_COORDINATES_Y, FPS
 
 GHOST_SPRITE_SIZE = (45, 45)
 RUN_POSITION_CHANGE_FREQUENCY = 2
 
+# 10 seconds
+SCATTER_DISABLE_TRIGGER = FPS * 10
+
 
 class Ghost(Entity):
+
     def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player,
                  turns: Turns, space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple,
                  ghost_house_exit: Tuple,
@@ -33,6 +37,8 @@ class Ghost(Entity):
                                         1] * self.space_params.tile_height + self.space_params.tile_height // 2
         self.ghost_house_exit = ghost_house_exit[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
                                 ghost_house_exit[1] * self.space_params.tile_height + self.space_params.tile_height // 2
+        self.set_to_scatter()
+        self.scatter_counter_duration = 0
 
     def is_in_house(self):
         x = self.location_x // self.space_params.tile_width
@@ -49,6 +55,9 @@ class Ghost(Entity):
     def is_chasing(self):
         return self.condition == self.State.CHASE
 
+    def is_scatter(self):
+        return self.condition == self.State.SCATTER
+
     def set_to_chase(self):
         self.velocity = 2
         self.condition = self.State.CHASE
@@ -57,18 +66,22 @@ class Ghost(Entity):
         self.velocity = 1
         self.condition = self.State.FRIGHTENED
 
+    def set_to_scatter(self):
+        self.velocity = 2
+        self.condition = self.State.SCATTER
+
     def set_to_eaten(self):
         self.condition = self.State.EATEN
         self.velocity = 8
 
     def draw(self, screen):
-        if self.condition == self.State.CHASE:
+        if self.is_chasing() or self.is_scatter():
             screen.blit(pygame.transform.flip(self.img, True, False),
                         (self.top_left_x, self.top_left_y))
-        elif self.condition == self.State.FRIGHTENED:
+        elif self.is_frightened():
             screen.blit(pygame.transform.flip(self.frightened_img, True, False),
                         (self.top_left_x, self.top_left_y))
-        else:  # eaten
+        elif self.is_eaten():
             screen.blit(pygame.transform.flip(self.eaten_img, True, False),
                         (self.top_left_x, self.top_left_y))
 
@@ -76,6 +89,13 @@ class Ghost(Entity):
         self._check_borders_ahead()
         if self.is_eaten() and self.is_in_house():
             self.set_to_chase()
+
+        self.scatter_counter_duration += 1
+        print(self.scatter_counter_duration)
+        if self.scatter_counter_duration == SCATTER_DISABLE_TRIGGER:
+            self.set_to_chase()
+            self.scatter_counter_duration = 0
+
 
         right_distance = self.calc_distance(self.location_x + self.space_params.tile_width, self.location_y)
         left_distance = self.calc_distance(self.location_x - self.space_params.tile_width, self.location_y)

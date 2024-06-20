@@ -39,7 +39,8 @@ class LevelContentInitializer:
         pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pink.png'), GHOST_SPRITE_SIZE)
         inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.png'), GHOST_SPRITE_SIZE)
         clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/orange.png'), GHOST_SPRITE_SIZE)
-        frightened_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/frightened.png'), GHOST_SPRITE_SIZE)
+        frightened_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/frightened.png'),
+                                                GHOST_SPRITE_SIZE)
         eaten_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eaten.png'), GHOST_SPRITE_SIZE)
 
         blinky_location = (BLINKY_X * self.tile_width + self.tile_width // 2,
@@ -63,13 +64,13 @@ class LevelContentInitializer:
                       player=player, turns=turns, space_params=space_params, home_corner=PINKY_CORNER,
                       ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
         inky = Inky(center_position=inky_location,
-                     img=inky_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                     player=player, turns=turns, space_params=space_params, home_corner=(5, 5),
-                     blinky=blinky,
-                     ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
+                    img=inky_img, frightened_img=frightened_img, eaten_img=eaten_img,
+                    player=player, turns=turns, space_params=space_params, home_corner=INKY_CORNER,
+                    blinky=blinky,
+                    ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
         clyde = Clyde(center_position=clyde_location,
                       img=clyde_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                      player=player, turns=turns, space_params=space_params, home_corner=(0, 0),
+                      player=player, turns=turns, space_params=space_params, home_corner=CLYDE_CORNER,
                       ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
 
         return [blinky, pinky, inky, clyde]

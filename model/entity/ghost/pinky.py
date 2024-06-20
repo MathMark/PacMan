@@ -2,7 +2,6 @@ import pygame
 
 from model.direction import Direction
 from model.entity.ghost.ghost import Ghost
-from settings import GHOST_HOUSE_EXIT
 
 
 class Pinky(Ghost):
@@ -28,5 +27,7 @@ class Pinky(Ghost):
                 return self.home_corner
             elif self.is_eaten():
                 return self.ghost_house_location
+            elif self.is_scatter():
+                return self.home_corner
 
 
