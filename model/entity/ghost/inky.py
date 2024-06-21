@@ -22,13 +22,11 @@ class Inky(Ghost):
         if self.is_in_house():
             return self.ghost_house_exit
         else:
-            if self.is_chasing():
+            if self.is_chasing() or self.is_frightened():
                 middle_point = self.__calculate_middle_target_point()
                 delta_x = self.blinky.location_x - middle_point[0]
                 delta_y = self.blinky.location_y - middle_point[1]
                 return self.blinky.location_x - (-1 * delta_x), self.blinky.location_y - (-1 * delta_y)
-            elif self.is_frightened():
-                return self.home_corner
             elif self.is_eaten():
                 return self.ghost_house_location
             elif self.is_scatter():

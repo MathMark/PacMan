@@ -4,7 +4,6 @@ from pygame import Surface
 from draw.game_engine import SCORE_SCREEN_OFFSET, GameEngine
 from model.entity.ghost.blinky import Blinky
 from model.entity.ghost.clyde import Clyde
-from model.entity.ghost.ghost import GHOST_SPRITE_SIZE
 from model.entity.ghost.inky import Inky
 from model.entity.ghost.pinky import Pinky
 from model.level_config import LevelConfig
@@ -35,13 +34,13 @@ class LevelContentInitializer:
         return Player(player_images, initial_position, Turns(), space_params)
 
     def __load_ghosts(self, player: Player):
-        blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/red.png'), GHOST_SPRITE_SIZE)
-        pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pink.png'), GHOST_SPRITE_SIZE)
-        inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.png'), GHOST_SPRITE_SIZE)
-        clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/orange.png'), GHOST_SPRITE_SIZE)
+        blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/red.png'), SPRITE_SIZE)
+        pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pink.png'), SPRITE_SIZE)
+        inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.png'), SPRITE_SIZE)
+        clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/orange.png'), SPRITE_SIZE)
         frightened_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/frightened.png'),
-                                                GHOST_SPRITE_SIZE)
-        eaten_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eaten.png'), GHOST_SPRITE_SIZE)
+                                                SPRITE_SIZE)
+        eaten_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eaten.png'), SPRITE_SIZE)
 
         blinky_location = (BLINKY_X * self.tile_width + self.tile_width // 2,
                            BLINKY_Y * self.tile_height + self.tile_height // 2)

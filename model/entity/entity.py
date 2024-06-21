@@ -5,17 +5,19 @@ from model.direction import Direction
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
 
+DEFAULT_VELOCITY = 2
+
 
 class Entity:
-    def __init__(self, center_position: Tuple, turns: Turns, space_params: SpaceParams, velocity=2):
+    def __init__(self, center_position: Tuple, turns: Turns, space_params: SpaceParams, velocity=DEFAULT_VELOCITY):
         self.space_params = space_params
         # entity location aligned by tile center
         self.location_x = center_position[0]
         self.location_y = center_position[1]
 
         # entity top left point - to know where to draw entity sprite
-        self.top_left_x = self.location_x - SPRITE_SIZE // 2
-        self.top_left_y = self.location_y - SPRITE_SIZE // 2
+        self.top_left_x = self.location_x - SPRITE_SIZE[0] // 2
+        self.top_left_y = self.location_y - SPRITE_SIZE[1] // 2
 
         self.velocity = velocity
         self.direction = Direction.LEFT
@@ -26,7 +28,6 @@ class Entity:
     def _move_right(self):
         self.location_x += self.velocity
         self.top_left_x += self.velocity
-
 
     def _move_left(self):
         self.location_x -= self.velocity
@@ -39,7 +40,6 @@ class Entity:
     def _move_down(self):
         self.location_y += self.velocity
         self.top_left_y += self.velocity
-
 
     def _check_borders_ahead(self):
         pass
@@ -81,8 +81,8 @@ class Entity:
     def _snap_to_center(self, cell_width, cell_height):
         self.location_x = round(self.location_x // cell_width) * cell_width + cell_width // 2
         self.location_y = round(self.location_y // cell_height) * cell_height + cell_height // 2
-        self.top_left_x = self.location_x - SPRITE_SIZE // 2
-        self.top_left_y = self.location_y - SPRITE_SIZE // 2
+        self.top_left_x = self.location_x - SPRITE_SIZE[0] // 2
+        self.top_left_y = self.location_y - SPRITE_SIZE[1] // 2
 
     def _is_at_center(self, cell_width, cell_height):
         return (self.location_x - cell_width // 2) % cell_width < 2 and \
@@ -92,8 +92,8 @@ class Entity:
         left_i = (self.top_left_y // self.space_params.tile_height)
         left_j = (self.top_left_x // self.space_params.tile_width)
 
-        right_i = ((self.top_left_y + SPRITE_SIZE) // self.space_params.tile_height)
-        right_j = ((self.top_left_x + SPRITE_SIZE) // self.space_params.tile_width)
+        right_i = ((self.top_left_y + SPRITE_SIZE[0]) // self.space_params.tile_height)
+        right_j = ((self.top_left_x + SPRITE_SIZE[1]) // self.space_params.tile_width)
 
         if left_j >= self.space_params.board_definition.width - 1:
             self.__teleport(self.space_params.tile_width, self.top_left_y)
@@ -113,8 +113,7 @@ class Entity:
             return self.board[i][j] < 3
 
     def __teleport(self, x, y):
-        # TODO: fix it. we should pass coordinates aligned by tile center!
         self.top_left_x = x
         self.top_left_y = y
-        self.location_x = self.top_left_x + SPRITE_SIZE // 2
-        self.location_y = self.top_left_y + SPRITE_SIZE // 2
+        self.location_x = self.top_left_x + SPRITE_SIZE[0] // 2
+        self.location_y = self.top_left_y + SPRITE_SIZE[1] // 2

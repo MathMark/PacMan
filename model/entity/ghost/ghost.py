@@ -9,11 +9,15 @@ from model.space_params.space_params import SpaceParams
 from model.turns import Turns
 from settings import DISTANCE_FACTOR, GHOST_HOUSE_COORDINATES_X, GHOST_HOUSE_COORDINATES_Y, FPS
 
-GHOST_SPRITE_SIZE = (45, 45)
-RUN_POSITION_CHANGE_FREQUENCY = 2
+# 5 seconds
+SCATTER_DISABLE_TRIGGER = FPS * 5
 
-# 10 seconds
-SCATTER_DISABLE_TRIGGER = FPS * 10
+# every 40 seconds
+SCATTER_ENABLE_TRIGGER = FPS * 40
+
+DEFAULT_VELOCITY = 2
+SLOW_VELOCITY = 1
+FAST_VELOCITY = 8
 
 
 class Ghost(Entity):
@@ -21,24 +25,30 @@ class Ghost(Entity):
     def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player,
                  turns: Turns, space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple,
                  ghost_house_exit: Tuple,
-                 velocity=2):
+                 velocity=DEFAULT_VELOCITY):
         super().__init__(center_position, turns, space_params, velocity)
+        # sprites
         self.img = img
         self.eaten_img = eaten_img
         self.frightened_img = frightened_img
-        self.direction = Direction.UP
+
+        # surrounding awareness
         self.player = player
-        self.condition = self.State.CHASE
-        self.home_corner = home_corner[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
-                           home_corner[1] * self.space_params.tile_height + self.space_params.tile_height // 2
-        self.ghost_house_location = ghost_house_location[
-                                        0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
-                                    ghost_house_location[
-                                        1] * self.space_params.tile_height + self.space_params.tile_height // 2
-        self.ghost_house_exit = ghost_house_exit[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
-                                ghost_house_exit[1] * self.space_params.tile_height + self.space_params.tile_height // 2
+        self.home_corner = self.__recalculate_to_screen_coordinates(home_corner)
+        self.ghost_house_location = self.__recalculate_to_screen_coordinates(ghost_house_location)
+        self.ghost_house_exit = self.__recalculate_to_screen_coordinates(ghost_house_exit)
+
+        # initial state
+        self.direction = Direction.UP
+        self.state = self.State.CHASE
         self.set_to_scatter()
+        self.runaway = False
         self.scatter_counter_duration = 0
+        self.enable_scatter_counter = 0
+
+    def __recalculate_to_screen_coordinates(self, board_coordinates):
+        return board_coordinates[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
+               board_coordinates[1] * self.space_params.tile_height + self.space_params.tile_height // 2
 
     def is_in_house(self):
         x = self.location_x // self.space_params.tile_width
@@ -47,32 +57,35 @@ class Ghost(Entity):
             and GHOST_HOUSE_COORDINATES_Y[0] <= y <= GHOST_HOUSE_COORDINATES_Y[1]
 
     def is_frightened(self):
-        return self.condition == self.State.FRIGHTENED
+        return self.state == self.State.FRIGHTENED
 
     def is_eaten(self):
-        return self.condition == self.State.EATEN
+        return self.state == self.State.EATEN
 
     def is_chasing(self):
-        return self.condition == self.State.CHASE
+        return self.state == self.State.CHASE
 
     def is_scatter(self):
-        return self.condition == self.State.SCATTER
+        return self.state == self.State.SCATTER
 
     def set_to_chase(self):
-        self.velocity = 2
-        self.condition = self.State.CHASE
+        self.velocity = DEFAULT_VELOCITY
+        self.state = self.State.CHASE
 
     def set_to_frightened(self):
-        self.velocity = 1
-        self.condition = self.State.FRIGHTENED
+        if not self.is_eaten():
+            self.change_direction_to_opposite()
+            self.velocity = SLOW_VELOCITY
+            self.state = self.State.FRIGHTENED
 
     def set_to_scatter(self):
-        self.velocity = 2
-        self.condition = self.State.SCATTER
+        if not self.is_eaten():
+            self.velocity = DEFAULT_VELOCITY
+            self.state = self.State.SCATTER
 
     def set_to_eaten(self):
-        self.condition = self.State.EATEN
-        self.velocity = 8
+        self.state = self.State.EATEN
+        self.velocity = FAST_VELOCITY
 
     def draw(self, screen):
         if self.is_chasing() or self.is_scatter():
@@ -85,15 +98,38 @@ class Ghost(Entity):
             screen.blit(pygame.transform.flip(self.eaten_img, True, False),
                         (self.top_left_x, self.top_left_y))
 
+    def change_direction_to_opposite(self):
+        if self.direction == Direction.LEFT:
+            self._move(Direction.RIGHT)
+        elif self.direction == Direction.RIGHT:
+            self._move(Direction.LEFT)
+        elif self.direction == Direction.DOWN:
+            self._move(Direction.UP)
+        elif self.direction == Direction.UP:
+            self._move(Direction.DOWN)
+
     def follow_target(self):
         self._check_borders_ahead()
         if self.is_eaten() and self.is_in_house():
             self.set_to_chase()
 
-        self.scatter_counter_duration += 1
-        if self.is_scatter() and self.scatter_counter_duration == SCATTER_DISABLE_TRIGGER:
-            self.set_to_chase()
-            self.scatter_counter_duration = 0
+        if self.is_scatter():
+            if self.scatter_counter_duration == SCATTER_DISABLE_TRIGGER:
+                self.set_to_chase()
+                self.scatter_counter_duration = 0
+            else:
+                self.scatter_counter_duration += 1
+
+        if self.enable_scatter_counter == SCATTER_ENABLE_TRIGGER and self.is_chasing():
+            self.set_to_scatter()
+            self.enable_scatter_counter = 0
+        else:
+            self.enable_scatter_counter += 1
+
+        if self.is_frightened():
+            self.runaway = True
+        else:
+            self.runaway = False
 
         right_distance = self.calc_distance(self.location_x + self.space_params.tile_width, self.location_y)
         left_distance = self.calc_distance(self.location_x - self.space_params.tile_width, self.location_y)
@@ -119,7 +155,7 @@ class Ghost(Entity):
             self._move(next_turn)
 
     def calc_next_turn(self, possible_decisions):
-        prioritized = sorted(possible_decisions, key=lambda x: x[0], reverse=False)
+        prioritized = sorted(possible_decisions, key=lambda x: x[0], reverse=self.runaway)
         for i in range(len(prioritized)):
             if prioritized[i][2]:
                 return prioritized[i][1]
