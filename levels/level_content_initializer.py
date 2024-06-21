@@ -2,10 +2,10 @@ import pygame
 from pygame import Surface
 
 from draw.game_engine import SCORE_SCREEN_OFFSET, GameEngine
-from model.coordinates import Coordinates
 from model.entity.ghost.blinky import Blinky
 from model.entity.ghost.clyde import Clyde
-from model.entity.ghost.ghost import GHOST_SPRITE_SIZE, Ghost
+from model.entity.ghost.ghost import GHOST_SPRITE_SIZE
+from model.entity.ghost.inky import Inky
 from model.entity.ghost.pinky import Pinky
 from model.level_config import LevelConfig
 from model.entity.player.player import PLAYER_SPRITE_SIZE, Player
@@ -19,22 +19,22 @@ class LevelContentInitializer:
     def __init__(self, level: LevelConfig, screen: Surface):
         self.level = level
         self.screen = screen
-        self.segment_height = ((self.screen.get_height() - SCORE_SCREEN_OFFSET) // level.board_definition.height)
-        self.segment_width = (self.screen.get_width() // level.board_definition.width)
+        self.tile_height = ((self.screen.get_height() - SCORE_SCREEN_OFFSET) // level.board_definition.height)
+        self.tile_width = (self.screen.get_width() // level.board_definition.width)
         self.player = self.__load_player()
 
     def __load_player(self):
         player_images = []
 
-        initial_position = Coordinates(PLAYER_X * self.segment_width + (self.segment_width // 2),
-                                       PLAYER_Y * self.segment_height + (self.segment_height // 2))
+        initial_position = (PLAYER_X * self.tile_width + (self.tile_width // 2),
+                            PLAYER_Y * self.tile_height + (self.tile_height // 2))
         for i in range(1, 5):
             player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'),
                                                         (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
-        space_params = SpaceParams(self.level.board_definition, self.segment_width, self.segment_height, 21)
+        space_params = SpaceParams(self.level.board_definition, self.tile_width, self.tile_height, 21)
         return Player(player_images, initial_position, Turns(), space_params)
 
-    def __load_ghosts(self, target: Coordinates):
+    def __load_ghosts(self, player: Player):
         blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/red.png'), GHOST_SPRITE_SIZE)
         pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pink.png'), GHOST_SPRITE_SIZE)
         inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.png'), GHOST_SPRITE_SIZE)
@@ -43,33 +43,39 @@ class LevelContentInitializer:
                                                 GHOST_SPRITE_SIZE)
         eaten_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/eaten.png'), GHOST_SPRITE_SIZE)
 
-        turns = Turns()
-        space_params = SpaceParams(self.level.board_definition, self.segment_width, self.segment_height, 21)
+        blinky_location = (BLINKY_X * self.tile_width + self.tile_width // 2,
+                           BLINKY_Y * self.tile_height + self.tile_height // 2)
+        pinky_location = (PINKY_X * self.tile_width + self.tile_width // 2,
+                          PINKY_Y * self.tile_height + self.tile_height // 2)
+        inky_location = (INKY_X * self.tile_width + self.tile_width // 2,
+                         INKY_Y * self.tile_height + self.tile_height // 2)
+        clyde_location = (CLYDE_X * self.tile_width + self.tile_width // 2,
+                          CLYDE_Y * self.tile_height + self.tile_height // 2)
 
-        blinky = Blinky(center_position=Coordinates(BLINKY_X * self.segment_width + (self.segment_width // 2),
-                                                   BLINKY_Y * self.segment_height + (
-                                                               self.segment_height // 2)),
-                       img=blinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                       target=target, turns=turns, space_params=space_params, home_corner=Coordinates(5, 5))
-        pinky = Pinky(center_position=Coordinates(PINKY_X * self.segment_width + (self.segment_width // 2),
-                                                  PINKY_Y * self.segment_height + (
-                                                          self.segment_height // 2)),
+        turns = Turns()
+        space_params = SpaceParams(self.level.board_definition, self.tile_width, self.tile_height, 21)
+
+        blinky = Blinky(center_position=blinky_location,
+                        img=blinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
+                        player=player, turns=turns, space_params=space_params, home_corner=BLINKY_CORNER,
+                        ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
+        pinky = Pinky(center_position=pinky_location,
                       img=pinky_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                      target=target, turns=turns, space_params=space_params, home_corner=Coordinates(5, 5))
-        inky = Ghost(center_position=Coordinates(INKY_X * self.segment_width + (self.segment_width // 2),
-                                                 INKY_Y * self.segment_height + (
-                                                         self.segment_height // 2)),
-                     img=inky_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                     target=target, turns=turns, space_params=space_params, home_corner=Coordinates(5, 5))
-        clyde = Clyde(center_position=Coordinates(CLYDE_X * self.segment_width + (self.segment_width // 2),
-                                                  CLYDE_Y * self.segment_height + (
-                                                          self.segment_height // 2)),
+                      player=player, turns=turns, space_params=space_params, home_corner=PINKY_CORNER,
+                      ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
+        inky = Inky(center_position=inky_location,
+                    img=inky_img, frightened_img=frightened_img, eaten_img=eaten_img,
+                    player=player, turns=turns, space_params=space_params, home_corner=INKY_CORNER,
+                    blinky=blinky,
+                    ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
+        clyde = Clyde(center_position=clyde_location,
                       img=clyde_img, frightened_img=frightened_img, eaten_img=eaten_img,
-                      target=target, turns=turns, space_params=space_params, home_corner=Coordinates(0, 0))
+                      player=player, turns=turns, space_params=space_params, home_corner=CLYDE_CORNER,
+                      ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
 
         return [blinky, pinky, inky, clyde]
 
     def init_game_engine(self):
         player = self.__load_player()
-        ghosts = self.__load_ghosts(player.coordinates)
+        ghosts = self.__load_ghosts(player)
         return GameEngine(self.screen, self.level, player, ghosts)

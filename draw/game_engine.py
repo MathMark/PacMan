@@ -3,16 +3,24 @@ from pygame import Surface
 from model.board_structure import BoardStructure
 from model.direction import Direction
 from model.eaten_object import EatenObject
+from model.entity.ghost.blinky import Blinky
+from model.entity.ghost.clyde import Clyde
 from model.entity.ghost.ghost import Ghost
+from model.entity.ghost.inky import Inky
+from model.entity.ghost.pinky import Pinky
 from model.level_config import LevelConfig
 import math
 
 from model.entity.player.player import Player
+from settings import DISTANCE_FACTOR, FPS, DEBUG
 
 PI = math.pi
 
 FLICK_FREQUENCY = 20
 SCORE_SCREEN_OFFSET = 50
+
+# every 30 seconds
+SCATTER_ENABLE_TRIGGER = FPS * 30
 
 
 class GameEngine:
@@ -24,20 +32,19 @@ class GameEngine:
         self.board = self.board_definition.board
         self.board_width = self.board_definition.width
         self.board_height = self.board_definition.height
-        self.segment_height = ((screen.get_height() - SCORE_SCREEN_OFFSET) // self.board_height)
-        self.segment_width = (screen.get_width() // self.board_width)
+        self.tile_height = ((screen.get_height() - SCORE_SCREEN_OFFSET) // self.board_height)
+        self.tile_width = (screen.get_width() // self.board_width)
         self.flicker_counter = 0
         self.flick = True
         self.player = player
         self.ghosts = ghosts
-        self.distance_factor = 10
         self.direction_command = Direction.LEFT
-        pygame.font.init()
         self.game_font = pygame.font.SysFont('Comic Sans MS', 30)
         self.power_up_counter = 0
         self.score_coordinates = (SCORE_SCREEN_OFFSET, (self.screen.get_height() - SCORE_SCREEN_OFFSET))
         self.powerup_circle_coordinates = (250, ((self.screen.get_height() - SCORE_SCREEN_OFFSET) + 15))
         self.pause = False
+        self.enable_scatter_counter = 0
 
     def tick(self):
         self.draw_level()
@@ -45,14 +52,24 @@ class GameEngine:
         self.draw_ghosts()
         self.draw_misc()
         self.check_ghosts_and_player_collision()
+        self.switch_to_scatter_mode()
+        if DEBUG:
+            self.debug()
+
+    def switch_to_scatter_mode(self):
+        if self.enable_scatter_counter == SCATTER_ENABLE_TRIGGER:
+            self.__set_ghosts_scatter()
+            self.enable_scatter_counter = 0
+        else:
+            self.enable_scatter_counter += 1
 
     def check_ghosts_and_player_collision(self):
         for ghost in self.ghosts:
-            if (abs(ghost.coordinates.x - self.player.coordinates.x) < self.distance_factor) \
-                    and (abs(ghost.coordinates.y - self.player.coordinates.y) < self.distance_factor):
+            if (abs(ghost.location_x - self.player.location_x) < DISTANCE_FACTOR) \
+                    and (abs(ghost.location_y - self.player.location_y) < DISTANCE_FACTOR):
                 if ghost.is_frightened():
                     ghost.set_to_eaten()
-                elif ghost.is_chasing():
+                elif ghost.is_chasing() or ghost.is_scatter():
                     self.player.lives = self.player.lives - 1
 
     def draw_player(self):
@@ -71,11 +88,7 @@ class GameEngine:
     def draw_ghosts(self):
         for ghost in self.ghosts:
             ghost.draw(self.screen)
-            if ghost.is_eaten():
-                ghost.runaway()
-            else:
-                ghost.follow_target()
-
+            ghost.follow_target()
 
     def __calc_power_up_counter(self):
         if self.player.power_up:
@@ -92,6 +105,10 @@ class GameEngine:
     def __set_ghosts_eaten(self):
         for ghost in self.ghosts:
             ghost.set_to_eaten()
+
+    def __set_ghosts_scatter(self):
+        for ghost in self.ghosts:
+            ghost.set_to_scatter()
 
     def __set_ghosts_to_chase(self):
         for ghost in self.ghosts:
@@ -121,62 +138,80 @@ class GameEngine:
             for j in range(len(self.board[i])):
                 if self.board[i][j] == BoardStructure.DOT.value:
                     center = (
-                        j * self.segment_width + (0.5 * self.segment_width),
-                        i * self.segment_height + (0.5 * self.segment_height))
+                        j * self.tile_width + (0.5 * self.tile_width),
+                        i * self.tile_height + (0.5 * self.tile_height))
                     pygame.draw.circle(self.screen, self.level.gate_color, center, 4)
                 if self.board[i][j] == BoardStructure.BIG_DOT.value and not self.flick:
                     center = (
-                        j * self.segment_width + (0.5 * self.segment_width),
-                        i * self.segment_height + (0.5 * self.segment_height))
+                        j * self.tile_width + (0.5 * self.tile_width),
+                        i * self.tile_height + (0.5 * self.tile_height))
                     pygame.draw.circle(self.screen, self.level.gate_color, center, 10)
                 if self.board[i][j] == BoardStructure.VERTICAL_WALL.value:
                     pygame.draw.line(self.screen, self.level.wall_color,
-                                     (j * self.segment_width + (0.5 * self.segment_width), i * self.segment_height),
-                                     (j * self.segment_width + (0.5 * self.segment_width),
-                                      i * self.segment_height + self.segment_height), 3)
+                                     (j * self.tile_width + (0.5 * self.tile_width), i * self.tile_height),
+                                     (j * self.tile_width + (0.5 * self.tile_width),
+                                      i * self.tile_height + self.tile_height), 3)
                 if self.board[i][j] == BoardStructure.HORIZONTAL_WALL.value:
                     pygame.draw.line(self.screen, self.level.wall_color,
-                                     (j * self.segment_width, i * self.segment_height + (0.5 * self.segment_height)),
-                                     (j * self.segment_width + self.segment_width,
-                                      i * self.segment_height + (0.5 * self.segment_height)), 3)
+                                     (j * self.tile_width, i * self.tile_height + (0.5 * self.tile_height)),
+                                     (j * self.tile_width + self.tile_width,
+                                      i * self.tile_height + (0.5 * self.tile_height)), 3)
                 if self.board[i][j] == BoardStructure.TOP_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
-                                    [(j * self.segment_width - (self.segment_width * 0.4)) - 2,
-                                     (i * self.segment_height + (0.5 * self.segment_height)), self.segment_width,
-                                     self.segment_height],
+                                    [(j * self.tile_width - (self.tile_width * 0.4)) - 2,
+                                     (i * self.tile_height + (0.5 * self.tile_height)), self.tile_width,
+                                     self.tile_height],
                                     0, PI / 2, 3)
                 if self.board[i][j] == BoardStructure.TOP_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
-                                    [(j * self.segment_width + (self.segment_width * 0.5)),
-                                     (i * self.segment_height + (0.5 * self.segment_height)),
-                                     self.segment_width, self.segment_height], PI / 2, PI,
+                                    [(j * self.tile_width + (self.tile_width * 0.5)),
+                                     (i * self.tile_height + (0.5 * self.tile_height)),
+                                     self.tile_width, self.tile_height], PI / 2, PI,
                                     3)
                 if self.board[i][j] == BoardStructure.BOTTOM_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
-                                    [(j * self.segment_width + (self.segment_width * 0.5)),
-                                     (i * self.segment_height - (0.4 * self.segment_height)),
-                                     self.segment_width, self.segment_height], PI,
+                                    [(j * self.tile_width + (self.tile_width * 0.5)),
+                                     (i * self.tile_height - (0.4 * self.tile_height)),
+                                     self.tile_width, self.tile_height], PI,
                                     3 * PI / 2, 3)
                 if self.board[i][j] == BoardStructure.BOTTOM_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
-                                    [(j * self.segment_width - (self.segment_width * 0.4)) - 2,
-                                     (i * self.segment_height - (0.4 * self.segment_height)), self.segment_width,
-                                     self.segment_height],
+                                    [(j * self.tile_width - (self.tile_width * 0.4)) - 2,
+                                     (i * self.tile_height - (0.4 * self.tile_height)), self.tile_width,
+                                     self.tile_height],
                                     3 * PI / 2,
                                     2 * PI, 3)
                 if self.board[i][j] == BoardStructure.GATE.value:
                     pygame.draw.line(self.screen, self.level.gate_color,
-                                     (j * self.segment_width, i * self.segment_height + (0.5 * self.segment_height)),
-                                     (j * self.segment_width + self.segment_width,
-                                      i * self.segment_height + (0.5 * self.segment_height)), 3)
+                                     (j * self.tile_width, i * self.tile_height + (0.5 * self.tile_height)),
+                                     (j * self.tile_width + self.tile_width,
+                                      i * self.tile_height + (0.5 * self.tile_height)), 3)
 
     def debug(self):
+        self.debug_grid()
+        self.debug_ghost_targets()
+
+    def debug_ghost_targets(self):
+        for ghost in self.ghosts:
+            if isinstance(ghost, Blinky):
+                pygame.draw.circle(self.screen, 'red', ghost.target(), 8)
+            elif isinstance(ghost, Pinky):
+                pygame.draw.circle(self.screen, 'pink', ghost.target(), 8)
+            elif isinstance(ghost, Inky):
+                pygame.draw.circle(self.screen, 'blue', ghost.target(), 8)
+            elif isinstance(ghost, Clyde):
+                pygame.draw.circle(self.screen, 'yellow', ghost.target(), 8)
+
+    def debug_grid(self):
         # Draw additional grid to easily control object movements
         for i in range(self.board_definition.width):
             pygame.draw.line(self.screen, 'green',
-                             (i * self.segment_width, 0),
-                             (i * self.segment_width, self.board_definition.height * self.segment_height), 2)
+                             (i * self.tile_width, 0),
+                             (i * self.tile_width, self.board_definition.height * self.tile_height), 1)
         for j in range(self.board_definition.height):
             pygame.draw.line(self.screen, 'green',
-                             (0, j * self.segment_height),
-                             (self.board_definition.width * self.segment_width, j * self.segment_height), 2)
+                             (0, j * self.tile_height),
+                             (self.board_definition.width * self.tile_width, j * self.tile_height), 1)
+
+
+
