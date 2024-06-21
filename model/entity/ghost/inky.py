@@ -1,5 +1,6 @@
 from typing import Tuple
 
+from model.asset import Asset
 from model.direction import Direction
 from model.entity.ghost.blinky import Blinky
 from model.entity.ghost.ghost import Ghost
@@ -10,11 +11,11 @@ from model.turns import Turns
 
 class Inky(Ghost):
 
-    def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player, turns: Turns,
+    def __init__(self, center_position: Tuple, assets: Asset, frightened_img, eaten_img, player: Player, turns: Turns,
                  space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple, blinky: Blinky,
                  ghost_house_exit,
                  velocity=2):
-        super().__init__(center_position, img, frightened_img, eaten_img, player, turns, space_params, home_corner,
+        super().__init__(center_position, assets, frightened_img, eaten_img, player, turns, space_params, home_corner,
                          ghost_house_location, ghost_house_exit, velocity)
         self.blinky = blinky
 

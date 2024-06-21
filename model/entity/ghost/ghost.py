@@ -1,7 +1,9 @@
 import enum
 import math
-from typing import Tuple
+from typing import Tuple, List
 import pygame
+
+from model.asset import Asset
 from model.direction import Direction
 from model.entity.entity import Entity
 from model.entity.player.player import Player
@@ -19,16 +21,18 @@ DEFAULT_VELOCITY = 2
 SLOW_VELOCITY = 1
 FAST_VELOCITY = 8
 
+SPRITE_FREQUENCY = 10
+
 
 class Ghost(Entity):
 
-    def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player,
+    def __init__(self, center_position: Tuple, assets: Asset, frightened_img, eaten_img, player: Player,
                  turns: Turns, space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple,
                  ghost_house_exit: Tuple,
                  velocity=DEFAULT_VELOCITY):
         super().__init__(center_position, turns, space_params, velocity)
         # sprites
-        self.img = img
+        self.assets = assets
         self.eaten_img = eaten_img
         self.frightened_img = frightened_img
 
@@ -45,6 +49,8 @@ class Ghost(Entity):
         self.runaway = False
         self.scatter_counter_duration = 0
         self.enable_scatter_counter = 0
+        self.sprite_counter = 0
+        self.sprite_index = 0
 
     def __recalculate_to_screen_coordinates(self, board_coordinates):
         return board_coordinates[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
@@ -87,10 +93,30 @@ class Ghost(Entity):
         self.state = self.State.EATEN
         self.velocity = FAST_VELOCITY
 
+    def __calculate_sprite_index(self):
+        self.sprite_counter += 1
+        if self.sprite_counter % SPRITE_FREQUENCY == 0:
+            self.sprite_index = 1
+        if self.sprite_counter % (len(self.assets.left) * SPRITE_FREQUENCY) == 0:
+            self.sprite_index = 0
+
     def draw(self, screen):
+        self.__calculate_sprite_index()
+
         if self.is_chasing() or self.is_scatter():
-            screen.blit(pygame.transform.flip(self.img, True, False),
-                        (self.top_left_x, self.top_left_y))
+            if self.direction == Direction.LEFT:
+                screen.blit(self.assets.left[self.sprite_index],
+                            (self.top_left_x, self.top_left_y))
+            elif self.direction == Direction.RIGHT:
+                screen.blit(self.assets.right[self.sprite_index],
+                            (self.top_left_x, self.top_left_y))
+            elif self.direction == Direction.UP:
+                screen.blit(self.assets.up[self.sprite_index],
+                            (self.top_left_x, self.top_left_y))
+            elif self.direction == Direction.DOWN:
+                screen.blit(self.assets.down[self.sprite_index],
+                            (self.top_left_x, self.top_left_y))
+
         elif self.is_frightened():
             screen.blit(pygame.transform.flip(self.frightened_img, True, False),
                         (self.top_left_x, self.top_left_y))
