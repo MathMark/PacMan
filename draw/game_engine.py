@@ -22,6 +22,7 @@ SCORE_SCREEN_OFFSET = 50
 # 3 seconds
 START_TRIGGER = FPS * 3
 
+
 class GameEngine:
 
     def __init__(self, screen: Surface, level: LevelConfig, player: Player, ghosts: list[Ghost]):
@@ -93,7 +94,6 @@ class GameEngine:
             self.power_up_counter = self.level.power_up_limit
             self.__set_ghosts_frightened()
 
-
     def render_ghosts(self):
         for ghost in self.ghosts:
             ghost.render(self.screen)
@@ -101,7 +101,6 @@ class GameEngine:
     def move_ghosts(self):
         for ghost in self.ghosts:
             ghost.follow_target()
-
 
     def __calc_power_up_counter(self):
         if self.player.power_up:
@@ -147,60 +146,51 @@ class GameEngine:
                               self.screen.get_height() - SCORE_SCREEN_OFFSET))
 
     def render_ready_text(self):
-        ready_text = self.game_font.render(f'READY!', True, 'white')
+        ready_text = self.game_font.render(f'READY!', True, 'yellow')
         self.screen.blit(ready_text, (self.screen.get_width() // 2 - 50, self.screen.get_height() // 2))
-
 
     def render_level(self):
         self.__calculate_flick()
-        for i in range(len(self.board)):
-            for j in range(len(self.board[i])):
-                if self.board[i][j] == BoardStructure.DOT.value:
-                    center = (
-                        j * self.tile_width + (0.5 * self.tile_width),
-                        i * self.tile_height + (0.5 * self.tile_height))
+        for i, row in enumerate(self.board):
+            for j, cell in enumerate(self.board[i]):
+                x, y = j * self.tile_width, i * self.tile_height
+                center = (x + self.tile_width / 2, y + self.tile_height / 2)
+                if cell == BoardStructure.DOT.value:
                     pygame.draw.circle(self.screen, self.level.gate_color, center, 4)
-                if self.board[i][j] == BoardStructure.BIG_DOT.value and not self.flick:
-                    center = (
-                        j * self.tile_width + (0.5 * self.tile_width),
-                        i * self.tile_height + (0.5 * self.tile_height))
+                elif cell == BoardStructure.BIG_DOT.value and not self.flick:
                     pygame.draw.circle(self.screen, self.level.gate_color, center, 10)
-                if self.board[i][j] == BoardStructure.VERTICAL_WALL.value:
-                    pygame.draw.line(self.screen, self.level.wall_color,
-                                     (j * self.tile_width + (0.5 * self.tile_width), i * self.tile_height),
-                                     (j * self.tile_width + (0.5 * self.tile_width),
-                                      i * self.tile_height + self.tile_height), 3)
-                if self.board[i][j] == BoardStructure.HORIZONTAL_WALL.value:
-                    pygame.draw.line(self.screen, self.level.wall_color,
-                                     (j * self.tile_width, i * self.tile_height + (0.5 * self.tile_height)),
-                                     (j * self.tile_width + self.tile_width,
-                                      i * self.tile_height + (0.5 * self.tile_height)), 3)
-                if self.board[i][j] == BoardStructure.TOP_RIGHT_CORNER.value:
+                elif cell == BoardStructure.VERTICAL_WALL.value:
+                    pygame.draw.line(self.screen, self.level.wall_color, (x + self.tile_width / 2, y),
+                                     (x + self.tile_width / 2, y + self.tile_height), 3)
+                elif cell == BoardStructure.HORIZONTAL_WALL.value:
+                    pygame.draw.line(self.screen, self.level.wall_color, (x, y + self.tile_height / 2),
+                                     (x + self.tile_width, y + self.tile_height / 2), 3)
+                elif cell == BoardStructure.TOP_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
                                     [(j * self.tile_width - (self.tile_width * 0.4)) - 2,
                                      (i * self.tile_height + (0.5 * self.tile_height)), self.tile_width,
                                      self.tile_height],
                                     0, PI / 2, 3)
-                if self.board[i][j] == BoardStructure.TOP_LEFT_CORNER.value:
+                elif cell == BoardStructure.TOP_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
                                     [(j * self.tile_width + (self.tile_width * 0.5)),
                                      (i * self.tile_height + (0.5 * self.tile_height)),
                                      self.tile_width, self.tile_height], PI / 2, PI,
                                     3)
-                if self.board[i][j] == BoardStructure.BOTTOM_LEFT_CORNER.value:
+                elif cell == BoardStructure.BOTTOM_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
                                     [(j * self.tile_width + (self.tile_width * 0.5)),
                                      (i * self.tile_height - (0.4 * self.tile_height)),
                                      self.tile_width, self.tile_height], PI,
                                     3 * PI / 2, 3)
-                if self.board[i][j] == BoardStructure.BOTTOM_RIGHT_CORNER.value:
+                elif cell == BoardStructure.BOTTOM_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
                                     [(j * self.tile_width - (self.tile_width * 0.4)) - 2,
                                      (i * self.tile_height - (0.4 * self.tile_height)), self.tile_width,
                                      self.tile_height],
                                     3 * PI / 2,
                                     2 * PI, 3)
-                if self.board[i][j] == BoardStructure.GATE.value:
+                elif cell == BoardStructure.GATE.value:
                     pygame.draw.line(self.screen, self.level.gate_color,
                                      (j * self.tile_width, i * self.tile_height + (0.5 * self.tile_height)),
                                      (j * self.tile_width + self.tile_width,
