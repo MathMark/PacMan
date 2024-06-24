@@ -1,3 +1,4 @@
+import enum
 from typing import Tuple
 
 import pygame
@@ -8,23 +9,49 @@ from model.eaten_object import EatenObject
 from model.entity.entity import Entity
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
-from settings import DISTANCE_FACTOR
+from settings import DISTANCE_FACTOR, FPS
 
 PLAYER_SPRITE_SIZE = 45
 SPRITE_FREQUENCY = 7
 
-
 class Player(Entity):
-    def __init__(self, sprites: list, center_position: Tuple, turns: Turns, space_params: SpaceParams, velocity=2,
+    def __init__(self, sprites: list, center_position: Tuple, turns: Turns, space_params: SpaceParams, death_sprites: list, velocity=2,
                  lives=3):
         super().__init__(center_position, turns, space_params, velocity)
         self.sprites = sprites
+        self.death_sprites = death_sprites
         self.sprite_index = 0
+        self.death_animation_sprite_index = 0
+        self.death_sprite_counter = 0
         self.velocity = velocity
-        self.direction = Direction.LEFT
+        self.direction = Direction.RIGHT
         self.power_up = False
         self.lives = lives
         self.sprite_counter = 0
+        self.state = self.State.READY
+
+    def set_to_ready(self):
+        self.state = self.State.READY
+        self.reset_position()
+
+    def reset_position(self):
+        super().reset_position()
+        self.direction = Direction.RIGHT
+
+    def set_to_eaten(self):
+        self.state = self.State.EATEN
+
+    def set_to_chase(self):
+        self.state = self.State.CHASE
+
+    def is_ready(self):
+        return self.state == self.State.READY
+
+    def is_eaten(self):
+        return self.state == self.State.EATEN
+
+    def is_chasing(self):
+        return self.state == self.State.CHASE
 
     def eat(self):
         i = (self.location_y // self.space_params.tile_height)
@@ -38,7 +65,16 @@ class Player(Entity):
             return EatenObject.BIG_DOT
         return EatenObject.NOTHING
 
+    def play_death_animation(self, screen):
+        self.__calculate_death_sprite_index()
+        screen.blit(self.death_sprites[self.death_animation_sprite_index],
+                    (self.top_left_x, self.top_left_y))
+        if self.death_animation_sprite_index == len(self.death_sprites) - 2:
+            self.set_to_ready()
+            self.death_animation_sprite_index = 0
+
     def render(self, screen):
+        self.__calculate_sprite_index()
         if self.direction == Direction.LEFT:
             self.__draw_face_left(screen)
         elif self.direction == Direction.RIGHT:
@@ -51,7 +87,6 @@ class Player(Entity):
     def move(self, screen, direction_command: Direction):
         self._teleport_if_board_limit_reached()
         self._check_borders_ahead()
-        self.__calculate_sprite_index()
 
         turned = self._align_movement_to_cell_center(direction_command)
 
@@ -89,6 +124,13 @@ class Player(Entity):
             self.sprite_index += 1
         if self.sprite_counter % ((len(self.sprites) - 1) * SPRITE_FREQUENCY) == 0:
             self.sprite_index = 0
+
+    def __calculate_death_sprite_index(self):
+        self.death_sprite_counter += 1
+        if self.death_sprite_counter % SPRITE_FREQUENCY == 0:
+            self.death_animation_sprite_index += 1
+        if self.death_sprite_counter % ((len(self.death_sprites) - 1) * SPRITE_FREQUENCY) == 0:
+            self.death_animation_sprite_index = 0
 
     def __draw_face_left(self, screen):
         screen.blit(pygame.transform.flip(self.sprites[self.sprite_index], True, False),
@@ -138,3 +180,8 @@ class Player(Entity):
             self.turns.down = True
         else:
             self.turns.down = False
+
+    class State(enum.Enum):
+        READY = 0
+        EATEN = 1
+        CHASE = 2

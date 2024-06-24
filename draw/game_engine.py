@@ -19,6 +19,8 @@ PI = math.pi
 FLICK_FREQUENCY = 20
 SCORE_SCREEN_OFFSET = 50
 
+# 3 seconds
+START_TRIGGER = FPS * 3
 
 class GameEngine:
 
@@ -42,19 +44,28 @@ class GameEngine:
         self.powerup_circle_coordinates = (250, ((self.screen.get_height() - SCORE_SCREEN_OFFSET) + 15))
         self.pause = False
 
+        self.start_counter = 0
 
     def tick(self):
         self.render_level()
-        self.render_player()
-        self.move_player()
-        self.render_ghosts()
-        self.move_ghosts()
         self.draw_misc()
-        self.check_ghosts_and_player_collision()
-
+        self.render_ghosts()
+        if self.player.is_ready():
+            self.render_ready_text()
+            self.render_player()
+            self.start_counter += 1
+            if self.start_counter == START_TRIGGER:
+                self.player.set_to_chase()
+                self.start_counter = 0
+        elif self.player.is_chasing():
+            self.render_player()
+            self.move_player()
+            self.move_ghosts()
+            self.check_ghosts_and_player_collision()
+        elif self.player.is_eaten():
+            self.player.play_death_animation(self.screen)
         if DEBUG:
             self.debug()
-
 
     def check_ghosts_and_player_collision(self):
         for ghost in self.ghosts:
@@ -63,11 +74,11 @@ class GameEngine:
                 if ghost.is_frightened():
                     ghost.set_to_eaten()
                 elif ghost.is_chasing() or ghost.is_scatter():
+                    self.player.set_to_eaten()
                     self.player.lives = self.player.lives - 1
 
     def render_player(self):
         self.player.render(self.screen)
-
 
     def move_player(self):
         self.__calc_power_up_counter()
@@ -127,12 +138,18 @@ class GameEngine:
     def draw_misc(self):
         score_text = self.game_font.render(f'Score: {self.level.score}', True, 'white')
         self.screen.blit(score_text, self.score_coordinates)
+
         if self.player.power_up:
             pygame.draw.circle(self.screen, 'blue', self.powerup_circle_coordinates, 15)
         for i in range(self.player.lives):
-            self.screen.blit(pygame.transform.scale(self.player.sprites[0], (30, 30)),
+            self.screen.blit(pygame.transform.scale(self.player.sprites[1], (30, 30)),
                              (((self.screen.get_width() // 2) + (self.screen.get_width() // 4)) + i * 40,
                               self.screen.get_height() - SCORE_SCREEN_OFFSET))
+
+    def render_ready_text(self):
+        ready_text = self.game_font.render(f'READY!', True, 'white')
+        self.screen.blit(ready_text, (self.screen.get_width() // 2 - 50, self.screen.get_height() // 2))
+
 
     def render_level(self):
         self.__calculate_flick()

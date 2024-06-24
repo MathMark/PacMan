@@ -19,11 +19,19 @@ class Entity:
         self.top_left_x = self.location_x - SPRITE_SIZE[0] // 2
         self.top_left_y = self.location_y - SPRITE_SIZE[1] // 2
 
+        self.initial_pos = self.location_x, self.location_y
+
         self.velocity = velocity
-        self.direction = Direction.LEFT
+        self.direction = Direction.RIGHT
         self.turns = turns
 
         self.board = space_params.board_definition.board
+
+    def reset_position(self):
+        self.location_x = self.initial_pos[0]
+        self.location_y = self.initial_pos[1]
+        self.top_left_x = self.location_x - SPRITE_SIZE[0] // 2
+        self.top_left_y = self.location_y - SPRITE_SIZE[1] // 2
 
     def render(self, screen):
         pass
