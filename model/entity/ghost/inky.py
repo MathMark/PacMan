@@ -11,11 +11,11 @@ from model.turns import Turns
 
 class Inky(Ghost):
 
-    def __init__(self, center_position: Tuple, assets: Asset, frightened_img, eaten_img, player: Player, turns: Turns,
+    def __init__(self, center_position: Tuple, assets: Asset, frightened_assets: list, eaten_assets: Asset, player: Player, turns: Turns,
                  space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple, blinky: Blinky,
                  ghost_house_exit,
                  velocity=2):
-        super().__init__(center_position, assets, frightened_img, eaten_img, player, turns, space_params, home_corner,
+        super().__init__(center_position, assets, frightened_assets, eaten_assets, player, turns, space_params, home_corner,
                          ghost_house_location, ghost_house_exit, velocity)
         self.blinky = blinky
 

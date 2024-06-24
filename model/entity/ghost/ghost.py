@@ -26,15 +26,15 @@ SPRITE_FREQUENCY = 10
 
 class Ghost(Entity):
 
-    def __init__(self, center_position: Tuple, assets: Asset, frightened_img, eaten_img, player: Player,
+    def __init__(self, center_position: Tuple, assets: Asset, frightened_assets: list, eaten_assets: Asset, player: Player,
                  turns: Turns, space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple,
                  ghost_house_exit: Tuple,
                  velocity=DEFAULT_VELOCITY):
         super().__init__(center_position, turns, space_params, velocity)
         # sprites
         self.assets = assets
-        self.eaten_img = eaten_img
-        self.frightened_img = frightened_img
+        self.eaten_assets = eaten_assets
+        self.frightened_assets = frightened_assets
 
         # surrounding awareness
         self.player = player
@@ -118,11 +118,21 @@ class Ghost(Entity):
                             (self.top_left_x, self.top_left_y))
 
         elif self.is_frightened():
-            screen.blit(pygame.transform.flip(self.frightened_img, True, False),
+            screen.blit(pygame.transform.flip(self.frightened_assets[self.sprite_index], True, False),
                         (self.top_left_x, self.top_left_y))
         elif self.is_eaten():
-            screen.blit(pygame.transform.flip(self.eaten_img, True, False),
-                        (self.top_left_x, self.top_left_y))
+            if self.direction == Direction.LEFT:
+                screen.blit(self.eaten_assets.left[0],
+                            (self.top_left_x, self.top_left_y))
+            elif self.direction == Direction.RIGHT:
+                screen.blit(self.eaten_assets.right[0],
+                            (self.top_left_x, self.top_left_y))
+            elif self.direction == Direction.UP:
+                screen.blit(self.eaten_assets.up[0],
+                            (self.top_left_x, self.top_left_y))
+            elif self.direction == Direction.DOWN:
+                screen.blit(self.eaten_assets.down[0],
+                            (self.top_left_x, self.top_left_y))
 
     def change_direction_to_opposite(self):
         if self.direction == Direction.LEFT:
