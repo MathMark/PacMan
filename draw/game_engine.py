@@ -44,11 +44,14 @@ class GameEngine:
 
 
     def tick(self):
-        self.draw_level()
-        self.draw_player()
-        self.draw_ghosts()
+        self.render_level()
+        self.render_player()
+        self.move_player()
+        self.render_ghosts()
+        self.move_ghosts()
         self.draw_misc()
         self.check_ghosts_and_player_collision()
+
         if DEBUG:
             self.debug()
 
@@ -62,7 +65,11 @@ class GameEngine:
                 elif ghost.is_chasing() or ghost.is_scatter():
                     self.player.lives = self.player.lives - 1
 
-    def draw_player(self):
+    def render_player(self):
+        self.player.render(self.screen)
+
+
+    def move_player(self):
         self.__calc_power_up_counter()
         turned = self.player.move(self.screen, self.direction_command)
         if not turned:
@@ -75,10 +82,15 @@ class GameEngine:
             self.power_up_counter = self.level.power_up_limit
             self.__set_ghosts_frightened()
 
-    def draw_ghosts(self):
+
+    def render_ghosts(self):
         for ghost in self.ghosts:
-            ghost.draw(self.screen)
+            ghost.render(self.screen)
+
+    def move_ghosts(self):
+        for ghost in self.ghosts:
             ghost.follow_target()
+
 
     def __calc_power_up_counter(self):
         if self.player.power_up:
@@ -122,7 +134,7 @@ class GameEngine:
                              (((self.screen.get_width() // 2) + (self.screen.get_width() // 4)) + i * 40,
                               self.screen.get_height() - SCORE_SCREEN_OFFSET))
 
-    def draw_level(self):
+    def render_level(self):
         self.__calculate_flick()
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):

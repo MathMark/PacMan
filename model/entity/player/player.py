@@ -38,6 +38,16 @@ class Player(Entity):
             return EatenObject.BIG_DOT
         return EatenObject.NOTHING
 
+    def render(self, screen):
+        if self.direction == Direction.LEFT:
+            self.__draw_face_left(screen)
+        elif self.direction == Direction.RIGHT:
+            self.__draw_face_right(screen)
+        elif self.direction == Direction.DOWN:
+            self.__draw_face_down(screen)
+        elif self.direction == Direction.UP:
+            self.__draw_face_up(screen)
+
     def move(self, screen, direction_command: Direction):
         self._teleport_if_board_limit_reached()
         self._check_borders_ahead()

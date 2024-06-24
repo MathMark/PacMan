@@ -25,6 +25,9 @@ class Entity:
 
         self.board = space_params.board_definition.board
 
+    def render(self, screen):
+        pass
+
     def _move_right(self):
         self.location_x += self.velocity
         self.top_left_x += self.velocity

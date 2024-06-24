@@ -100,7 +100,7 @@ class Ghost(Entity):
         if self.sprite_counter % (len(self.assets.left) * SPRITE_FREQUENCY) == 0:
             self.sprite_index = 0
 
-    def draw(self, screen):
+    def render(self, screen):
         self.__calculate_sprite_index()
 
         if self.is_chasing() or self.is_scatter():
