@@ -1,5 +1,6 @@
 from typing import Tuple
 
+from model.asset import Asset
 from model.direction import Direction
 from model.entity.ghost.blinky import Blinky
 from model.entity.ghost.ghost import Ghost
@@ -10,11 +11,11 @@ from model.turns import Turns
 
 class Inky(Ghost):
 
-    def __init__(self, center_position: Tuple, img, frightened_img, eaten_img, player: Player, turns: Turns,
+    def __init__(self, center_position: Tuple, assets: Asset, frightened_assets: list, eaten_assets: Asset, player: Player, turns: Turns,
                  space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple, blinky: Blinky,
                  ghost_house_exit,
                  velocity=2):
-        super().__init__(center_position, img, frightened_img, eaten_img, player, turns, space_params, home_corner,
+        super().__init__(center_position, assets, frightened_assets, eaten_assets, player, turns, space_params, home_corner,
                          ghost_house_location, ghost_house_exit, velocity)
         self.blinky = blinky
 
@@ -22,13 +23,11 @@ class Inky(Ghost):
         if self.is_in_house():
             return self.ghost_house_exit
         else:
-            if self.is_chasing():
+            if self.is_chasing() or self.is_frightened():
                 middle_point = self.__calculate_middle_target_point()
                 delta_x = self.blinky.location_x - middle_point[0]
                 delta_y = self.blinky.location_y - middle_point[1]
                 return self.blinky.location_x - (-1 * delta_x), self.blinky.location_y - (-1 * delta_y)
-            elif self.is_frightened():
-                return self.home_corner
             elif self.is_eaten():
                 return self.ghost_house_location
             elif self.is_scatter():

@@ -19,9 +19,6 @@ PI = math.pi
 FLICK_FREQUENCY = 20
 SCORE_SCREEN_OFFSET = 50
 
-# every 30 seconds
-SCATTER_ENABLE_TRIGGER = FPS * 30
-
 
 class GameEngine:
 
@@ -44,7 +41,7 @@ class GameEngine:
         self.score_coordinates = (SCORE_SCREEN_OFFSET, (self.screen.get_height() - SCORE_SCREEN_OFFSET))
         self.powerup_circle_coordinates = (250, ((self.screen.get_height() - SCORE_SCREEN_OFFSET) + 15))
         self.pause = False
-        self.enable_scatter_counter = 0
+
 
     def tick(self):
         self.draw_level()
@@ -52,16 +49,9 @@ class GameEngine:
         self.draw_ghosts()
         self.draw_misc()
         self.check_ghosts_and_player_collision()
-        self.switch_to_scatter_mode()
         if DEBUG:
             self.debug()
 
-    def switch_to_scatter_mode(self):
-        if self.enable_scatter_counter == SCATTER_ENABLE_TRIGGER:
-            self.__set_ghosts_scatter()
-            self.enable_scatter_counter = 0
-        else:
-            self.enable_scatter_counter += 1
 
     def check_ghosts_and_player_collision(self):
         for ghost in self.ghosts:
