@@ -1,6 +1,5 @@
 # Pacman
 
-## Description
 Old classic Pacman game written in Python using pygame library.
 
 ## Ghosts behaviour
