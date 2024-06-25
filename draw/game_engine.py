@@ -92,7 +92,7 @@ class GameEngine:
         elif eaten == EatenObject.BIG_DOT:
             self.level.score += 50
             self.power_up_counter = self.level.power_up_limit
-            self.__set_ghosts_frightened()
+            self.__set_ghosts_state('frightened')
 
     def render_ghosts(self):
         for ghost in self.ghosts:
@@ -107,25 +107,20 @@ class GameEngine:
             if self.power_up_counter <= 0:
                 self.player.power_up = False
                 self.power_up_counter = 0
-                self.__set_ghosts_to_chase()
+                self.__set_ghosts_state('chase')
         self.power_up_counter -= 1
 
-    def __set_ghosts_frightened(self):
+    def __set_ghosts_state(self, state: str):
         for ghost in self.ghosts:
-            ghost.set_to_frightened()
-
-    def __set_ghosts_eaten(self):
-        for ghost in self.ghosts:
-            ghost.set_to_eaten()
-
-    def __set_ghosts_scatter(self):
-        for ghost in self.ghosts:
-            ghost.set_to_scatter()
-
-    def __set_ghosts_to_chase(self):
-        for ghost in self.ghosts:
-            if not ghost.is_eaten():
+            if state == 'frightened':
+                ghost.set_to_frightened()
+            elif state == 'eaten':
+                ghost.set_to_eaten()
+            elif state == 'scatter':
+                ghost.set_to_scatter()
+            elif state == 'chase':
                 ghost.set_to_chase()
+
 
     def __calculate_flick(self):
         self.flicker_counter += 1

@@ -52,6 +52,7 @@ class Ghost(Entity):
         self.sprite_counter = 0
         self.sprite_index = 0
 
+
     def __recalculate_to_screen_coordinates(self, board_coordinates):
         return board_coordinates[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
                board_coordinates[1] * self.space_params.tile_height + self.space_params.tile_height // 2
@@ -75,8 +76,9 @@ class Ghost(Entity):
         return self.state == self.State.SCATTER
 
     def set_to_chase(self):
-        self.velocity = DEFAULT_VELOCITY
-        self.state = self.State.CHASE
+        if not self.is_eaten():
+            self.velocity = DEFAULT_VELOCITY
+            self.state = self.State.CHASE
 
     def set_to_frightened(self):
         if not self.is_eaten():
@@ -147,7 +149,8 @@ class Ghost(Entity):
     def follow_target(self):
         self._check_borders_ahead()
         if self.is_eaten() and self.is_in_house():
-            self.set_to_chase()
+            self.velocity = DEFAULT_VELOCITY
+            self.state = self.State.CHASE
 
         if self.is_scatter():
             if self.scatter_counter_duration == SCATTER_DISABLE_TRIGGER:
