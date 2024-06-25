@@ -1,8 +1,9 @@
 # Pacman
 
+Old classic Pacman game written in Python using pygame library.
+
  <img width="892" alt="Screenshot 2024-06-25 at 12 31 20" src="https://github.com/MathMark/PacMan/assets/13971845/19fa8ce2-a5ed-4cb2-81d6-0130cdf5268e">
 
-Old classic Pacman game written in Python using pygame library.
 
 ## Ghosts behaviour
 
