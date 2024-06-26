@@ -26,15 +26,13 @@ class LevelContentInitializer:
         self.player = self.__load_player()
 
     def __load_player(self):
-        player_images = []
+        player_images, death_animation_images = self.render_player_assets()
 
         initial_position = (PLAYER_X * self.tile_width + (self.tile_width // 2),
                             PLAYER_Y * self.tile_height + (self.tile_height // 2))
-        for i in range(1, 5):
-            player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'),
-                                                        (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
+
         space_params = SpaceParams(self.level.board_definition, self.tile_width, self.tile_height, 21)
-        return Player(player_images, initial_position, Turns(), space_params)
+        return Player(player_images, initial_position, Turns(), space_params, death_animation_images)
 
     def __load_ghosts(self, player: Player):
         blinky_location = (BLINKY_X * self.tile_width + self.tile_width // 2,
@@ -74,6 +72,20 @@ class LevelContentInitializer:
         player = self.__load_player()
         ghosts = self.__load_ghosts(player)
         return GameEngine(self.screen, self.level, player, ghosts)
+
+    def render_player_assets(self):
+        player_images = []
+
+        for i in range(1, 5):
+            player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'),
+                                                        (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
+
+        death_animation_images = []
+
+        for i in range(1, 13):
+            death_animation_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/death_animation/{i}.png'),
+                                                        (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
+        return player_images, death_animation_images
 
     def render_ghosts_assets(self):
         blinky_folder = Path('assets/ghost_images/blinky')

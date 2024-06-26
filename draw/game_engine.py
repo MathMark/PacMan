@@ -19,6 +19,9 @@ PI = math.pi
 FLICK_FREQUENCY = 20
 SCORE_SCREEN_OFFSET = 50
 
+# 3 seconds
+START_TRIGGER = FPS * 3
+
 
 class GameEngine:
 
@@ -42,16 +45,29 @@ class GameEngine:
         self.powerup_circle_coordinates = (250, ((self.screen.get_height() - SCORE_SCREEN_OFFSET) + 15))
         self.pause = False
 
+        self.start_counter = 0
 
     def tick(self):
-        self.draw_level()
-        self.draw_player()
-        self.draw_ghosts()
+        self.render_level()
         self.draw_misc()
-        self.check_ghosts_and_player_collision()
+        self.render_ghosts()
+        if self.player.is_ready():
+            self.reset_ghosts()
+            self.render_ready_text()
+            self.render_player()
+            self.start_counter += 1
+            if self.start_counter == START_TRIGGER:
+                self.player.set_to_chase()
+                self.start_counter = 0
+        elif self.player.is_chasing():
+            self.render_player()
+            self.move_player()
+            self.move_ghosts()
+            self.check_ghosts_and_player_collision()
+        elif self.player.is_eaten():
+            self.player.play_death_animation(self.screen)
         if DEBUG:
             self.debug()
-
 
     def check_ghosts_and_player_collision(self):
         for ghost in self.ghosts:
@@ -60,9 +76,13 @@ class GameEngine:
                 if ghost.is_frightened():
                     ghost.set_to_eaten()
                 elif ghost.is_chasing() or ghost.is_scatter():
+                    self.player.set_to_eaten()
                     self.player.lives = self.player.lives - 1
 
-    def draw_player(self):
+    def render_player(self):
+        self.player.render(self.screen)
+
+    def move_player(self):
         self.__calc_power_up_counter()
         turned = self.player.move(self.screen, self.direction_command)
         if not turned:
@@ -73,36 +93,37 @@ class GameEngine:
         elif eaten == EatenObject.BIG_DOT:
             self.level.score += 50
             self.power_up_counter = self.level.power_up_limit
-            self.__set_ghosts_frightened()
+            self.__set_ghosts_state('frightened')
 
-    def draw_ghosts(self):
+    def render_ghosts(self):
         for ghost in self.ghosts:
-            ghost.draw(self.screen)
+            ghost.render(self.screen)
+
+    def move_ghosts(self):
+        for ghost in self.ghosts:
             ghost.follow_target()
+
+    def reset_ghosts(self):
+        for ghost in self.ghosts:
+            ghost.reset_position()
 
     def __calc_power_up_counter(self):
         if self.player.power_up:
             if self.power_up_counter <= 0:
                 self.player.power_up = False
                 self.power_up_counter = 0
-                self.__set_ghosts_to_chase()
+                self.__set_ghosts_state('chase')
         self.power_up_counter -= 1
 
-    def __set_ghosts_frightened(self):
+    def __set_ghosts_state(self, state: str):
         for ghost in self.ghosts:
-            ghost.set_to_frightened()
-
-    def __set_ghosts_eaten(self):
-        for ghost in self.ghosts:
-            ghost.set_to_eaten()
-
-    def __set_ghosts_scatter(self):
-        for ghost in self.ghosts:
-            ghost.set_to_scatter()
-
-    def __set_ghosts_to_chase(self):
-        for ghost in self.ghosts:
-            if not ghost.is_eaten():
+            if state == 'frightened':
+                ghost.set_to_frightened()
+            elif state == 'eaten':
+                ghost.set_to_eaten()
+            elif state == 'scatter':
+                ghost.set_to_scatter()
+            elif state == 'chase':
                 ghost.set_to_chase()
 
     def __calculate_flick(self):
@@ -115,63 +136,60 @@ class GameEngine:
     def draw_misc(self):
         score_text = self.game_font.render(f'Score: {self.level.score}', True, 'white')
         self.screen.blit(score_text, self.score_coordinates)
+
         if self.player.power_up:
             pygame.draw.circle(self.screen, 'blue', self.powerup_circle_coordinates, 15)
         for i in range(self.player.lives):
-            self.screen.blit(pygame.transform.scale(self.player.sprites[0], (30, 30)),
+            self.screen.blit(pygame.transform.scale(self.player.sprites[1], (30, 30)),
                              (((self.screen.get_width() // 2) + (self.screen.get_width() // 4)) + i * 40,
                               self.screen.get_height() - SCORE_SCREEN_OFFSET))
 
-    def draw_level(self):
+    def render_ready_text(self):
+        ready_text = self.game_font.render(f'READY!', True, 'yellow')
+        self.screen.blit(ready_text, (self.screen.get_width() // 2 - 50, self.screen.get_height() // 2))
+
+    def render_level(self):
         self.__calculate_flick()
-        for i in range(len(self.board)):
-            for j in range(len(self.board[i])):
-                if self.board[i][j] == BoardStructure.DOT.value:
-                    center = (
-                        j * self.tile_width + (0.5 * self.tile_width),
-                        i * self.tile_height + (0.5 * self.tile_height))
+        for i, row in enumerate(self.board):
+            for j, cell in enumerate(self.board[i]):
+                x, y = j * self.tile_width, i * self.tile_height
+                center = (x + self.tile_width / 2, y + self.tile_height / 2)
+                if cell == BoardStructure.DOT.value:
                     pygame.draw.circle(self.screen, self.level.gate_color, center, 4)
-                if self.board[i][j] == BoardStructure.BIG_DOT.value and not self.flick:
-                    center = (
-                        j * self.tile_width + (0.5 * self.tile_width),
-                        i * self.tile_height + (0.5 * self.tile_height))
+                elif cell == BoardStructure.BIG_DOT.value and not self.flick:
                     pygame.draw.circle(self.screen, self.level.gate_color, center, 10)
-                if self.board[i][j] == BoardStructure.VERTICAL_WALL.value:
-                    pygame.draw.line(self.screen, self.level.wall_color,
-                                     (j * self.tile_width + (0.5 * self.tile_width), i * self.tile_height),
-                                     (j * self.tile_width + (0.5 * self.tile_width),
-                                      i * self.tile_height + self.tile_height), 3)
-                if self.board[i][j] == BoardStructure.HORIZONTAL_WALL.value:
-                    pygame.draw.line(self.screen, self.level.wall_color,
-                                     (j * self.tile_width, i * self.tile_height + (0.5 * self.tile_height)),
-                                     (j * self.tile_width + self.tile_width,
-                                      i * self.tile_height + (0.5 * self.tile_height)), 3)
-                if self.board[i][j] == BoardStructure.TOP_RIGHT_CORNER.value:
+                elif cell == BoardStructure.VERTICAL_WALL.value:
+                    pygame.draw.line(self.screen, self.level.wall_color, (x + self.tile_width / 2, y),
+                                     (x + self.tile_width / 2, y + self.tile_height), 3)
+                elif cell == BoardStructure.HORIZONTAL_WALL.value:
+                    pygame.draw.line(self.screen, self.level.wall_color, (x, y + self.tile_height / 2),
+                                     (x + self.tile_width, y + self.tile_height / 2), 3)
+                elif cell == BoardStructure.TOP_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
                                     [(j * self.tile_width - (self.tile_width * 0.4)) - 2,
                                      (i * self.tile_height + (0.5 * self.tile_height)), self.tile_width,
                                      self.tile_height],
                                     0, PI / 2, 3)
-                if self.board[i][j] == BoardStructure.TOP_LEFT_CORNER.value:
+                elif cell == BoardStructure.TOP_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
                                     [(j * self.tile_width + (self.tile_width * 0.5)),
                                      (i * self.tile_height + (0.5 * self.tile_height)),
                                      self.tile_width, self.tile_height], PI / 2, PI,
                                     3)
-                if self.board[i][j] == BoardStructure.BOTTOM_LEFT_CORNER.value:
+                elif cell == BoardStructure.BOTTOM_LEFT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
                                     [(j * self.tile_width + (self.tile_width * 0.5)),
                                      (i * self.tile_height - (0.4 * self.tile_height)),
                                      self.tile_width, self.tile_height], PI,
                                     3 * PI / 2, 3)
-                if self.board[i][j] == BoardStructure.BOTTOM_RIGHT_CORNER.value:
+                elif cell == BoardStructure.BOTTOM_RIGHT_CORNER.value:
                     pygame.draw.arc(self.screen, self.level.wall_color,
                                     [(j * self.tile_width - (self.tile_width * 0.4)) - 2,
                                      (i * self.tile_height - (0.4 * self.tile_height)), self.tile_width,
                                      self.tile_height],
                                     3 * PI / 2,
                                     2 * PI, 3)
-                if self.board[i][j] == BoardStructure.GATE.value:
+                elif cell == BoardStructure.GATE.value:
                     pygame.draw.line(self.screen, self.level.gate_color,
                                      (j * self.tile_width, i * self.tile_height + (0.5 * self.tile_height)),
                                      (j * self.tile_width + self.tile_width,
