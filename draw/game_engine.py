@@ -52,6 +52,7 @@ class GameEngine:
         self.draw_misc()
         self.render_ghosts()
         if self.player.is_ready():
+            self.reset_ghosts()
             self.render_ready_text()
             self.render_player()
             self.start_counter += 1
@@ -102,6 +103,10 @@ class GameEngine:
         for ghost in self.ghosts:
             ghost.follow_target()
 
+    def reset_ghosts(self):
+        for ghost in self.ghosts:
+            ghost.reset_position()
+
     def __calc_power_up_counter(self):
         if self.player.power_up:
             if self.power_up_counter <= 0:
@@ -120,7 +125,6 @@ class GameEngine:
                 ghost.set_to_scatter()
             elif state == 'chase':
                 ghost.set_to_chase()
-
 
     def __calculate_flick(self):
         self.flicker_counter += 1
