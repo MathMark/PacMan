@@ -44,30 +44,56 @@ class GameEngine:
         self.score_coordinates = (SCORE_SCREEN_OFFSET, (self.screen.get_height() - SCORE_SCREEN_OFFSET))
         self.powerup_circle_coordinates = (250, ((self.screen.get_height() - SCORE_SCREEN_OFFSET) + 15))
         self.pause = False
-
         self.start_counter = 0
+        self.game_over = False
+
+    def show_game_over(self):
+        self.screen.fill((0, 0, 0))
+        font = pygame.font.SysFont('arial', 40)
+        title = font.render('Game Over', True, 'red')
+        restart_button = font.render('Hit Space to restart', True, (255, 255, 255))
+        self.screen.blit(title, (
+            self.screen.get_width() / 2 - title.get_width() / 2, self.screen.get_height() / 2 - title.get_height() / 3))
+        self.screen.blit(restart_button, (self.screen.get_width() / 2 - restart_button.get_width() / 2,
+                                          self.screen.get_height() / 1.9 + restart_button.get_height()))
+
+        self.screen.blit(self.ghosts[0].assets.right[0],
+                         (self.screen.get_width() / 2, self.screen.get_height() / 2 + self.screen.get_height() / 6))
+        self.screen.blit(self.ghosts[1].assets.right[0],
+                         (self.screen.get_width() / 2 - self.screen.get_width() / 8,
+                          self.screen.get_height() / 2 + self.screen.get_height() / 6))
+        self.screen.blit(self.ghosts[2].assets.right[0],
+                         (self.screen.get_width() / 2 - self.screen.get_width() / 16,
+                          self.screen.get_height() / 2 + self.screen.get_height() / 6))
+        self.screen.blit(self.ghosts[3].assets.right[0],
+                         (self.screen.get_width() / 2 + self.screen.get_width() / 16,
+                          self.screen.get_height() / 2 + self.screen.get_height() / 6))
 
     def tick(self):
-        self.render_level()
-        self.draw_misc()
-        self.render_ghosts()
-        if self.player.is_ready():
-            self.reset_ghosts()
-            self.render_ready_text()
-            self.render_player()
-            self.start_counter += 1
-            if self.start_counter == START_TRIGGER:
-                self.player.set_to_chase()
-                self.start_counter = 0
-        elif self.player.is_chasing():
-            self.render_player()
-            self.move_player()
-            self.move_ghosts()
-            self.check_ghosts_and_player_collision()
-        elif self.player.is_eaten():
-            self.player.play_death_animation(self.screen)
-        if DEBUG:
-            self.debug()
+        if self.player.lives == -1:
+            self.game_over = True
+            self.show_game_over()
+        else:
+            self.render_level()
+            self.draw_misc()
+            self.render_ghosts()
+            if self.player.is_ready():
+                self.reset_ghosts()
+                self.render_ready_text()
+                self.render_player()
+                self.start_counter += 1
+                if self.start_counter == START_TRIGGER:
+                    self.player.set_to_chase()
+                    self.start_counter = 0
+            elif self.player.is_chasing():
+                self.render_player()
+                self.move_player()
+                self.move_ghosts()
+                self.check_ghosts_and_player_collision()
+            elif self.player.is_eaten():
+                self.player.play_death_animation(self.screen)
+            if DEBUG:
+                self.debug()
 
     def check_ghosts_and_player_collision(self):
         for ghost in self.ghosts:
@@ -77,7 +103,7 @@ class GameEngine:
                     ghost.set_to_eaten()
                 elif ghost.is_chasing() or ghost.is_scatter():
                     self.player.set_to_eaten()
-                    self.player.lives = self.player.lives - 1
+
 
     def render_player(self):
         self.player.render(self.screen)
@@ -220,6 +246,3 @@ class GameEngine:
             pygame.draw.line(self.screen, 'green',
                              (0, j * self.tile_height),
                              (self.board_definition.width * self.tile_width, j * self.tile_height), 1)
-
-
-

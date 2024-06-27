@@ -14,11 +14,15 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode(RESOLUTION)
         self.timer = pygame.time.Clock()
-        board_definition = BoardDefinition(BOARD)
+        self.game_engine = self.init()
+
+    def init(self):
+        board = BOARD.copy()
+        board_definition = BoardDefinition(board)
         level_1 = LevelConfig(wall_color='blue', gate_color='white',
                               board_definition=board_definition, power_up_limit=POWER_UP_LIMIT)
         level_init = LevelContentInitializer(level_1, self.screen)
-        self.game_engine = level_init.init_game_engine()
+        return level_init.init_game_engine()
 
     def update(self):
         self.timer.tick(FPS)
@@ -42,6 +46,9 @@ class Game:
                     self.game_engine.direction_command = Direction.DOWN
                 if event.key == pygame.K_UP:
                     self.game_engine.direction_command = Direction.UP
+                if event.key == pygame.K_SPACE and self.game_engine.game_over:
+                    pygame.init()
+                    self.game_engine = self.init()
 
     def run(self):
         while True:

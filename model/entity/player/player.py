@@ -14,6 +14,7 @@ from settings import DISTANCE_FACTOR, FPS
 PLAYER_SPRITE_SIZE = 45
 SPRITE_FREQUENCY = 7
 
+
 class Player(Entity):
     def __init__(self, sprites: list, center_position: Tuple, turns: Turns, space_params: SpaceParams, death_sprites: list, velocity=2,
                  lives=3):
@@ -72,6 +73,7 @@ class Player(Entity):
         if self.death_animation_sprite_index == len(self.death_sprites) - 2:
             self.set_to_ready()
             self.death_animation_sprite_index = 0
+            self.lives -= 1
 
     def render(self, screen):
         self.__calculate_sprite_index()
