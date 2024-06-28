@@ -4,6 +4,10 @@ Old classic Pacman game written in Python using pygame library.
 
  <img width="892" alt="Screenshot 2024-06-25 at 12 31 20" src="https://github.com/MathMark/PacMan/assets/13971845/19fa8ce2-a5ed-4cb2-81d6-0130cdf5268e">
 
+# Description
+
+The game contains a single demo-level. To increase difficulty you can play around with variables in settings file changing POWERUP_LIMIT, SCATTER_DISABLE_TRIGGER, SCATTER_ENABLE_TRIGGER, VELOCITY. You can also set 
+variable DEBUG to True to see ghosts targets visualization and grid.
 
 ## Ghosts behaviour
 
