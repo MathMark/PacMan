@@ -7,7 +7,6 @@ DISTANCE_FACTOR = 10
 
 SPRITE_SIZE = 45, 45
 
-
 # PLAYER INITIAL POSITION
 PLAYER_POSITION = PLAYER_X, PLAYER_Y = 13, 24
 
@@ -27,9 +26,24 @@ GHOST_HOUSE_LOCATION = 15, 14
 GHOST_HOUSE_EXIT = 14, 12
 
 POWER_UP_LIMIT = 10 * FPS
+
+# GHOST HOUSE BOUNDARIES TO KNOW WHEN A GHOST IS INSIDE THE HOUSE
 GHOST_HOUSE_COORDINATES_X = (11, 16)
 GHOST_HOUSE_COORDINATES_Y = (14, 16)
 
+# 5 seconds
+SCATTER_DISABLE_TRIGGER = FPS * 5
+
+# every 40 seconds
+SCATTER_ENABLE_TRIGGER = FPS * 40
+
+DEFAULT_VELOCITY = 2
+SLOW_VELOCITY = 1
+FAST_VELOCITY = 8
+
+# The greater number -> the slower animation
+PLAYER_SPRITE_FREQUENCY = 7
+GHOST_SPRITE_FREQUENCY = 10
 
 # 0 = empty black rectangle, 1 = dot, 2 = big dot, 3 = vertical line,
 # 4 = horizontal line, 5 = top right, 6 = top left, 7 = bot left, 8 = bot right

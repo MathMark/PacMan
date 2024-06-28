@@ -1,27 +1,13 @@
 import enum
 import math
 from typing import Tuple
-import pygame
-
 from model.asset import Asset
 from model.direction import Direction
 from model.entity.entity import Entity
 from model.entity.player.player import Player
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
-from settings import DISTANCE_FACTOR, GHOST_HOUSE_COORDINATES_X, GHOST_HOUSE_COORDINATES_Y, FPS
-
-# 5 seconds
-SCATTER_DISABLE_TRIGGER = FPS * 5
-
-# every 40 seconds
-SCATTER_ENABLE_TRIGGER = FPS * 40
-
-DEFAULT_VELOCITY = 2
-SLOW_VELOCITY = 1
-FAST_VELOCITY = 8
-
-SPRITE_FREQUENCY = 10
+from settings import *
 
 
 class Ghost(Entity):
@@ -101,9 +87,9 @@ class Ghost(Entity):
 
     def __calculate_sprite_index(self):
         self.sprite_counter += 1
-        if self.sprite_counter % SPRITE_FREQUENCY == 0:
+        if self.sprite_counter % GHOST_SPRITE_FREQUENCY == 0:
             self.sprite_index = 1
-        if self.sprite_counter % (len(self.assets.left) * SPRITE_FREQUENCY) == 0:
+        if self.sprite_counter % (len(self.assets.left) * GHOST_SPRITE_FREQUENCY) == 0:
             self.sprite_index = 0
 
     def render(self, screen):
