@@ -1,6 +1,9 @@
 import enum
 import math
 from typing import Tuple
+
+import pygame
+
 from model.asset import Asset
 from model.direction import Direction
 from model.entity.entity import Entity
@@ -82,6 +85,7 @@ class Ghost(Entity):
             self.state = self.State.SCATTER
 
     def set_to_eaten(self):
+        self.sfx.ghost_eaten.play()
         self.state = self.State.EATEN
         self.velocity = FAST_VELOCITY
 

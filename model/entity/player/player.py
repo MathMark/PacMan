@@ -58,10 +58,13 @@ class Player(Entity):
         self.__calc_power_up_counter()
         i = (self.location_y // self.space_params.tile_height)
         j = (self.location_x // self.space_params.tile_width)
+
         if self.board[i][j] == BoardStructure.DOT.value:
+            self.sfx.play_munch()
             self.board[i][j] = 0
             return EatenObject.DOT
         elif self.board[i][j] == BoardStructure.BIG_DOT.value:
+            self.sfx.power_pellet.play()
             self.board[i][j] = 0
             self.powerup = True
             return EatenObject.BIG_DOT

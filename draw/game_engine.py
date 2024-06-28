@@ -12,16 +12,12 @@ from model.level_config import LevelConfig
 import math
 
 from model.entity.player.player import Player
-from settings import DISTANCE_FACTOR, FPS, DEBUG
+from settings import *
 
 PI = math.pi
 
 FLICK_FREQUENCY = 20
 SCORE_SCREEN_OFFSET = 50
-
-# 3 seconds
-START_TRIGGER = FPS * 3
-
 
 class GameEngine:
 

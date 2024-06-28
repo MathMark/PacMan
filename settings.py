@@ -37,6 +37,9 @@ SCATTER_DISABLE_TRIGGER = FPS * 5
 # every 40 seconds
 SCATTER_ENABLE_TRIGGER = FPS * 40
 
+# 4 seconds
+START_TRIGGER = FPS * 4
+
 DEFAULT_VELOCITY = 2
 SLOW_VELOCITY = 1
 FAST_VELOCITY = 8
@@ -44,6 +47,8 @@ FAST_VELOCITY = 8
 # The greater number -> the slower animation
 PLAYER_SPRITE_FREQUENCY = 7
 GHOST_SPRITE_FREQUENCY = 10
+
+
 
 # 0 = empty black rectangle, 1 = dot, 2 = big dot, 3 = vertical line,
 # 4 = horizontal line, 5 = top right, 6 = top left, 7 = bot left, 8 = bot right

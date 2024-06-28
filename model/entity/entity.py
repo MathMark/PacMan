@@ -1,5 +1,7 @@
 from typing import Tuple
 
+import pygame
+
 from settings import *
 from model.direction import Direction
 from model.space_params.space_params import SpaceParams
@@ -9,7 +11,8 @@ DEFAULT_VELOCITY = 2
 
 
 class Entity:
-    def __init__(self, center_position: Tuple, turns: Turns, space_params: SpaceParams, velocity=DEFAULT_VELOCITY):
+    def __init__(self, center_position: Tuple, turns: Turns, space_params: SpaceParams,
+                 velocity=DEFAULT_VELOCITY):
         self.space_params = space_params
         # entity location aligned by tile center
         self.location_x = center_position[0]
@@ -26,6 +29,7 @@ class Entity:
         self.turns = turns
 
         self.board = space_params.board_definition.board
+        self.sfx = self.SoundEffects()
 
     def reset_position(self):
         self.location_x = self.initial_pos[0]
@@ -128,3 +132,19 @@ class Entity:
         self.top_left_y = y
         self.location_x = self.top_left_x + SPRITE_SIZE[0] // 2
         self.location_y = self.top_left_y + SPRITE_SIZE[1] // 2
+
+    class SoundEffects:
+        def __init__(self):
+            self.munch_i = False
+            self.ghost_eaten = pygame.mixer.Sound('media/eat_ghost.wav')
+            self.munch = [pygame.mixer.Sound('media/munch_1.wav'), pygame.mixer.Sound('media/munch_2.wav')]
+            self.power_pellet = pygame.mixer.Sound('media/power_pellet.wav')
+
+        def play_munch(self):
+            if self.munch_i:
+                self.munch[1].play()
+                self.munch_i = False
+            else:
+                self.munch[0].play()
+                self.munch_i = True
+

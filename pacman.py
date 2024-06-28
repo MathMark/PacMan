@@ -15,6 +15,7 @@ class Game:
         self.screen = pygame.display.set_mode(RESOLUTION)
         self.timer = pygame.time.Clock()
         self.game_engine = self.init()
+        self.game_start_sfx = pygame.mixer.Sound('media/game_start.wav')
 
     def init(self):
         board = BOARD.copy()
@@ -30,7 +31,7 @@ class Game:
         pygame.display.flip()
 
     def draw(self):
-        self.screen.fill('black')
+        self.screen.fill([12, 2, 25])
 
     def check_events(self):
         for event in pygame.event.get():
@@ -48,9 +49,11 @@ class Game:
                     self.game_engine.direction_command = Direction.UP
                 if event.key == pygame.K_SPACE and self.game_engine.game_over:
                     pygame.init()
+                    self.game_start_sfx.play()
                     self.game_engine = self.init()
 
     def run(self):
+        self.game_start_sfx.play()
         while True:
             self.check_events()
             self.update()
