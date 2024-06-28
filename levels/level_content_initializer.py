@@ -141,8 +141,8 @@ class LevelContentInitializer:
                              down=[pygame.transform.scale(pygame.image.load(eaten_folder.joinpath('eyes_down.png')), SPRITE_SIZE)],
                              up=[pygame.transform.scale(pygame.image.load(eaten_folder.joinpath('eyes_up.png')), SPRITE_SIZE)])
 
-        blink_assets = [pygame.transform.scale(pygame.image.load('assets/ghost_images/blink_sprites/scared_1.png'), SPRITE_SIZE),
-                        pygame.transform.scale(pygame.image.load('assets/ghost_images/blink_sprites/scared_2.png'), SPRITE_SIZE)]
+        blink_assets = [pygame.transform.scale(pygame.image.load('assets/ghost_images/scared_1.png'), SPRITE_SIZE),
+                        pygame.transform.scale(pygame.image.load('assets/ghost_images/scared_3.png'), SPRITE_SIZE)]
 
         return blinky_assets, pinky_assets, inky_assets, clyde_assets, frightened_assets, eaten_assets, blink_assets
 
