@@ -30,6 +30,7 @@ class Player(Entity):
         self.lives = lives
         self.sprite_counter = 0
         self.state = self.State.READY
+        self.score_multiplier = 1
 
     def set_to_ready(self):
         self.state = self.State.READY

@@ -100,6 +100,8 @@ class GameEngine:
             if (abs(ghost.location_x - self.player.location_x) < DISTANCE_FACTOR) \
                     and (abs(ghost.location_y - self.player.location_y) < DISTANCE_FACTOR):
                 if ghost.is_frightened():
+                    self.level.score += 50 * self.player.score_multiplier
+                    self.player.score_multiplier += 1
                     ghost.set_to_eaten()
                 elif ghost.is_chasing() or ghost.is_scatter():
                     self.player.set_to_eaten()
@@ -137,6 +139,7 @@ class GameEngine:
         if self.player.power_up:
             if self.power_up_counter <= 0:
                 self.player.power_up = False
+                self.player.score_multiplier = 1
                 self.power_up_counter = 0
                 self.__set_ghosts_state('chase')
         self.power_up_counter -= 1
