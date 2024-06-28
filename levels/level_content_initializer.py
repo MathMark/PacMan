@@ -46,24 +46,25 @@ class LevelContentInitializer:
 
         turns = Turns()
         space_params = SpaceParams(self.level.board_definition, self.tile_width, self.tile_height, 21)
-        blinky_assets, pinky_assets, inky_assets, clyde_assets, frightened_assets, eaten_assets = self.render_ghosts_assets()
+        blinky_assets, pinky_assets, inky_assets, \
+            clyde_assets, frightened_assets, eaten_assets, blink_assets = self.render_ghosts_assets()
 
         blinky = Blinky(center_position=blinky_location,
                         assets=blinky_assets, frightened_assets=frightened_assets, eaten_assets=eaten_assets,
-                        player=player, turns=turns, space_params=space_params, home_corner=BLINKY_CORNER,
+                        blink_assets=blink_assets, player=player, turns=turns, space_params=space_params, home_corner=BLINKY_CORNER,
                         ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
         pinky = Pinky(center_position=pinky_location,
                       assets=pinky_assets, frightened_assets=frightened_assets, eaten_assets=eaten_assets,
-                      player=player, turns=turns, space_params=space_params, home_corner=PINKY_CORNER,
+                      blink_assets=blink_assets, player=player, turns=turns, space_params=space_params, home_corner=PINKY_CORNER,
                       ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
         inky = Inky(center_position=inky_location,
                     assets=inky_assets, frightened_assets=frightened_assets, eaten_assets=eaten_assets,
-                    player=player, turns=turns, space_params=space_params, home_corner=INKY_CORNER,
+                    blink_assets=blink_assets, player=player, turns=turns, space_params=space_params, home_corner=INKY_CORNER,
                     blinky=blinky,
                     ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
         clyde = Clyde(center_position=clyde_location,
                       assets=clyde_assets, frightened_assets=frightened_assets, eaten_assets=eaten_assets,
-                      player=player, turns=turns, space_params=space_params, home_corner=CLYDE_CORNER,
+                      blink_assets=blink_assets, player=player, turns=turns, space_params=space_params, home_corner=CLYDE_CORNER,
                       ghost_house_location=GHOST_HOUSE_LOCATION, ghost_house_exit=GHOST_HOUSE_EXIT)
 
         return [blinky, pinky, inky, clyde]
@@ -140,5 +141,8 @@ class LevelContentInitializer:
                              down=[pygame.transform.scale(pygame.image.load(eaten_folder.joinpath('eyes_down.png')), SPRITE_SIZE)],
                              up=[pygame.transform.scale(pygame.image.load(eaten_folder.joinpath('eyes_up.png')), SPRITE_SIZE)])
 
-        return blinky_assets, pinky_assets, inky_assets, clyde_assets, frightened_assets, eaten_assets
+        blink_assets = [pygame.transform.scale(pygame.image.load('assets/ghost_images/blink_sprites/scared_1.png'), SPRITE_SIZE),
+                        pygame.transform.scale(pygame.image.load('assets/ghost_images/blink_sprites/scared_2.png'), SPRITE_SIZE)]
+
+        return blinky_assets, pinky_assets, inky_assets, clyde_assets, frightened_assets, eaten_assets, blink_assets
 

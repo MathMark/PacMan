@@ -9,7 +9,7 @@ from model.eaten_object import EatenObject
 from model.entity.entity import Entity
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
-from settings import DISTANCE_FACTOR, FPS
+from settings import DISTANCE_FACTOR
 
 PLAYER_SPRITE_SIZE = 45
 SPRITE_FREQUENCY = 7
@@ -26,11 +26,13 @@ class Player(Entity):
         self.death_sprite_counter = 0
         self.velocity = velocity
         self.direction = Direction.RIGHT
-        self.power_up = False
         self.lives = lives
         self.sprite_counter = 0
         self.state = self.State.READY
         self.score_multiplier = 1
+
+        self.powerup = False
+        self.powerup_counter = 0
 
     def set_to_ready(self):
         self.state = self.State.READY
@@ -56,6 +58,7 @@ class Player(Entity):
         return self.state == self.State.CHASE
 
     def eat(self):
+        self.__calc_power_up_counter()
         i = (self.location_y // self.space_params.tile_height)
         j = (self.location_x // self.space_params.tile_width)
         if self.board[i][j] == BoardStructure.DOT.value:
@@ -63,9 +66,17 @@ class Player(Entity):
             return EatenObject.DOT
         elif self.board[i][j] == BoardStructure.BIG_DOT.value:
             self.board[i][j] = 0
-            self.power_up = True
+            self.powerup = True
             return EatenObject.BIG_DOT
         return EatenObject.NOTHING
+
+    def __calc_power_up_counter(self):
+        if self.powerup:
+            if self.powerup_counter <= 0:
+                self.powerup = False
+                self.score_multiplier = 1
+                self.powerup_counter = 0
+        self.powerup_counter -= 1
 
     def play_death_animation(self, screen):
         self.__calculate_death_sprite_index()

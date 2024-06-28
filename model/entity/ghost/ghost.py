@@ -27,7 +27,7 @@ SPRITE_FREQUENCY = 10
 class Ghost(Entity):
 
     def __init__(self, center_position: Tuple, assets: Asset, frightened_assets: list, eaten_assets: Asset,
-                 player: Player,
+                 blink_assets: list, player: Player,
                  turns: Turns, space_params: SpaceParams, home_corner: Tuple, ghost_house_location: Tuple,
                  ghost_house_exit: Tuple,
                  velocity=DEFAULT_VELOCITY):
@@ -36,6 +36,7 @@ class Ghost(Entity):
         self.assets = assets
         self.eaten_assets = eaten_assets
         self.frightened_assets = frightened_assets
+        self.blink_assets = blink_assets
 
         # surrounding awareness
         self.player = player
@@ -123,8 +124,12 @@ class Ghost(Entity):
                             (self.top_left_x, self.top_left_y))
 
         elif self.is_frightened():
-            screen.blit(pygame.transform.flip(self.frightened_assets[self.sprite_index], True, False),
-                        (self.top_left_x, self.top_left_y))
+            if self.player.powerup_counter < 3 * FPS:
+                screen.blit(self.blink_assets[self.sprite_index],
+                            (self.top_left_x, self.top_left_y))
+            else:
+                screen.blit(self.frightened_assets[self.sprite_index],
+                                (self.top_left_x, self.top_left_y))
         elif self.is_eaten():
             if self.direction == Direction.LEFT:
                 screen.blit(self.eaten_assets.left[0],

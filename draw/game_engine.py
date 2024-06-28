@@ -40,7 +40,6 @@ class GameEngine:
         self.ghosts = ghosts
         self.direction_command = Direction.LEFT
         self.game_font = pygame.font.SysFont('Comic Sans MS', 30)
-        self.power_up_counter = 0
         self.score_coordinates = (SCORE_SCREEN_OFFSET, (self.screen.get_height() - SCORE_SCREEN_OFFSET))
         self.powerup_circle_coordinates = (250, ((self.screen.get_height() - SCORE_SCREEN_OFFSET) + 15))
         self.pause = False
@@ -111,7 +110,6 @@ class GameEngine:
         self.player.render(self.screen)
 
     def move_player(self):
-        self.__calc_power_up_counter()
         turned = self.player.move(self.screen, self.direction_command)
         if not turned:
             self.direction_command = self.player.direction
@@ -120,8 +118,10 @@ class GameEngine:
             self.level.score += 10
         elif eaten == EatenObject.BIG_DOT:
             self.level.score += 50
-            self.power_up_counter = self.level.power_up_limit
+            self.player.powerup_counter = self.level.power_up_limit
             self.__set_ghosts_state('frightened')
+        if not self.player.powerup:
+            self.__set_ghosts_state('chase')
 
     def render_ghosts(self):
         for ghost in self.ghosts:
@@ -134,15 +134,6 @@ class GameEngine:
     def reset_ghosts(self):
         for ghost in self.ghosts:
             ghost.reset_position()
-
-    def __calc_power_up_counter(self):
-        if self.player.power_up:
-            if self.power_up_counter <= 0:
-                self.player.power_up = False
-                self.player.score_multiplier = 1
-                self.power_up_counter = 0
-                self.__set_ghosts_state('chase')
-        self.power_up_counter -= 1
 
     def __set_ghosts_state(self, state: str):
         for ghost in self.ghosts:
@@ -166,7 +157,7 @@ class GameEngine:
         score_text = self.game_font.render(f'Score: {self.level.score}', True, 'white')
         self.screen.blit(score_text, self.score_coordinates)
 
-        if self.player.power_up:
+        if self.player.powerup:
             pygame.draw.circle(self.screen, 'blue', self.powerup_circle_coordinates, 15)
         for i in range(self.player.lives):
             self.screen.blit(pygame.transform.scale(self.player.sprites[1], (30, 30)),
