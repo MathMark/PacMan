@@ -1,4 +1,5 @@
 import numpy as np
+import pygame
 
 FPS = 60
 DEBUG = False
@@ -47,6 +48,10 @@ FAST_VELOCITY = 8
 # The greater number -> the slower animation
 PLAYER_SPRITE_FREQUENCY = 7
 GHOST_SPRITE_FREQUENCY = 10
+
+
+GHOST_EATEN_EVENT = pygame.USEREVENT + 1
+PLAYER_EATEN_EVENT = pygame.USEREVENT + 2
 
 
 

@@ -7,8 +7,6 @@ from model.direction import Direction
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
 
-DEFAULT_VELOCITY = 2
-
 
 class Entity:
     def __init__(self, center_position: Tuple, turns: Turns, space_params: SpaceParams,
@@ -139,6 +137,8 @@ class Entity:
             self.ghost_eaten = pygame.mixer.Sound('media/eat_ghost.wav')
             self.munch = [pygame.mixer.Sound('media/munch_1.wav'), pygame.mixer.Sound('media/munch_2.wav')]
             self.power_pellet = pygame.mixer.Sound('media/power_pellet.wav')
+            self.retreating = pygame.mixer.Sound('media/retreating.wav')
+            self.pacman_death = pygame.mixer.Sound('media/pacman_death.wav')
 
         def play_munch(self):
             if self.munch_i:

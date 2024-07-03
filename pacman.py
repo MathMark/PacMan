@@ -1,7 +1,4 @@
 import sys
-
-import pygame
-
 from model.board_definition import BoardDefinition
 from model.level_config import LevelConfig
 from settings import *
@@ -51,6 +48,10 @@ class Game:
                     pygame.init()
                     self.game_start_sfx.play()
                     self.game_engine = self.init()
+            if event.type == GHOST_EATEN_EVENT:
+                self.game_engine.play_ghost_runsaway_sound()
+            if event.type == PLAYER_EATEN_EVENT:
+                self.game_engine.play_player_eaten_sound()
 
     def run(self):
         self.game_start_sfx.play()

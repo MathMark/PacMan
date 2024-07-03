@@ -1,9 +1,6 @@
 import enum
 import math
 from typing import Tuple
-
-import pygame
-
 from model.asset import Asset
 from model.direction import Direction
 from model.entity.entity import Entity
@@ -85,7 +82,9 @@ class Ghost(Entity):
             self.state = self.State.SCATTER
 
     def set_to_eaten(self):
+        delay = self.sfx.ghost_eaten.get_length()
         self.sfx.ghost_eaten.play()
+        pygame.time.set_timer(GHOST_EATEN_EVENT, int(delay * 1000), True)
         self.state = self.State.EATEN
         self.velocity = FAST_VELOCITY
 
