@@ -101,6 +101,7 @@ class GameEngine:
                     self.player.score_multiplier += 1
                     ghost.set_to_eaten()
                 elif ghost.is_chasing() or ghost.is_scatter():
+                    pygame.time.wait(500)
                     pygame.time.set_timer(PLAYER_EATEN_EVENT, 1, True)
                     self.player.set_to_eaten()
 
