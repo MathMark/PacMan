@@ -1,8 +1,5 @@
 from pathlib import Path
-
-import pygame
 from pygame import Surface
-
 from draw.game_engine import SCORE_SCREEN_OFFSET, GameEngine
 from model.asset import Asset
 from model.entity.ghost.blinky import Blinky
@@ -10,7 +7,7 @@ from model.entity.ghost.clyde import Clyde
 from model.entity.ghost.inky import Inky
 from model.entity.ghost.pinky import Pinky
 from model.level_config import LevelConfig
-from model.entity.player.player import PLAYER_SPRITE_SIZE, Player
+from model.entity.player.player import *
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
 from settings import *
@@ -79,13 +76,13 @@ class LevelContentInitializer:
 
         for i in range(1, 5):
             player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'),
-                                                        (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
+                                                        SPRITE_SIZE))
 
         death_animation_images = []
 
         for i in range(1, 13):
             death_animation_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/death_animation/{i}.png'),
-                                                        (PLAYER_SPRITE_SIZE, PLAYER_SPRITE_SIZE)))
+                                                        SPRITE_SIZE))
         return player_images, death_animation_images
 
     def render_ghosts_assets(self):
@@ -141,8 +138,11 @@ class LevelContentInitializer:
                              down=[pygame.transform.scale(pygame.image.load(eaten_folder.joinpath('eyes_down.png')), SPRITE_SIZE)],
                              up=[pygame.transform.scale(pygame.image.load(eaten_folder.joinpath('eyes_up.png')), SPRITE_SIZE)])
 
-        blink_assets = [pygame.transform.scale(pygame.image.load('assets/ghost_images/blink_sprites/scared_1.png'), SPRITE_SIZE),
-                        pygame.transform.scale(pygame.image.load('assets/ghost_images/blink_sprites/scared_2.png'), SPRITE_SIZE)]
+        blink_assets = [pygame.transform.scale(pygame.image.load('assets/ghost_images/scared_1.png'), SPRITE_SIZE),
+                        pygame.transform.scale(pygame.image.load('assets/ghost_images/scared_3.png'), SPRITE_SIZE)]
 
         return blinky_assets, pinky_assets, inky_assets, clyde_assets, frightened_assets, eaten_assets, blink_assets
+
+
+
 

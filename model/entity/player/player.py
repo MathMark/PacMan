@@ -9,10 +9,7 @@ from model.eaten_object import EatenObject
 from model.entity.entity import Entity
 from model.space_params.space_params import SpaceParams
 from model.turns import Turns
-from settings import DISTANCE_FACTOR
-
-PLAYER_SPRITE_SIZE = 45
-SPRITE_FREQUENCY = 7
+from settings import *
 
 
 class Player(Entity):
@@ -61,10 +58,13 @@ class Player(Entity):
         self.__calc_power_up_counter()
         i = (self.location_y // self.space_params.tile_height)
         j = (self.location_x // self.space_params.tile_width)
+
         if self.board[i][j] == BoardStructure.DOT.value:
+            self.sfx.play_munch()
             self.board[i][j] = 0
             return EatenObject.DOT
         elif self.board[i][j] == BoardStructure.BIG_DOT.value:
+            self.sfx.power_pellet.play()
             self.board[i][j] = 0
             self.powerup = True
             return EatenObject.BIG_DOT
@@ -134,16 +134,16 @@ class Player(Entity):
 
     def __calculate_sprite_index(self):
         self.sprite_counter += 1
-        if self.sprite_counter % SPRITE_FREQUENCY == 0:
+        if self.sprite_counter % PLAYER_SPRITE_FREQUENCY == 0:
             self.sprite_index += 1
-        if self.sprite_counter % ((len(self.sprites) - 1) * SPRITE_FREQUENCY) == 0:
+        if self.sprite_counter % ((len(self.sprites) - 1) * PLAYER_SPRITE_FREQUENCY) == 0:
             self.sprite_index = 0
 
     def __calculate_death_sprite_index(self):
         self.death_sprite_counter += 1
-        if self.death_sprite_counter % SPRITE_FREQUENCY == 0:
+        if self.death_sprite_counter % PLAYER_SPRITE_FREQUENCY == 0:
             self.death_animation_sprite_index += 1
-        if self.death_sprite_counter % ((len(self.death_sprites) - 1) * SPRITE_FREQUENCY) == 0:
+        if self.death_sprite_counter % ((len(self.death_sprites) - 1) * PLAYER_SPRITE_FREQUENCY) == 0:
             self.death_animation_sprite_index = 0
 
     def __draw_face_left(self, screen):

@@ -12,16 +12,14 @@ from model.level_config import LevelConfig
 import math
 
 from model.entity.player.player import Player
-from settings import DISTANCE_FACTOR, FPS, DEBUG
+from settings import *
 
 PI = math.pi
 
 FLICK_FREQUENCY = 20
 SCORE_SCREEN_OFFSET = 50
 
-# 3 seconds
-START_TRIGGER = FPS * 3
-
+GHOST_EATEN_EVENT = pygame.USEREVENT + 1
 
 class GameEngine:
 
@@ -103,8 +101,15 @@ class GameEngine:
                     self.player.score_multiplier += 1
                     ghost.set_to_eaten()
                 elif ghost.is_chasing() or ghost.is_scatter():
+                    pygame.time.wait(500)
+                    pygame.time.set_timer(PLAYER_EATEN_EVENT, 1, True)
                     self.player.set_to_eaten()
 
+    def play_ghost_runsaway_sound(self):
+        self.player.sfx.retreating.play()
+
+    def play_player_eaten_sound(self):
+        self.player.sfx.pacman_death.play()
 
     def render_player(self):
         self.player.render(self.screen)
