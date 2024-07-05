@@ -44,6 +44,10 @@ class Ghost(Entity):
         return board_coordinates[0] * self.space_params.tile_width - self.space_params.tile_width // 2, \
                board_coordinates[1] * self.space_params.tile_height + self.space_params.tile_height // 2
 
+    def reset_position(self):
+        self.__set_to_chase()
+        super().reset_position()
+
     def is_in_house(self):
         x = self.location_x // self.space_params.tile_width
         y = self.location_y // self.space_params.tile_height
